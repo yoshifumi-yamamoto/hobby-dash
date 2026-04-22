@@ -12,10 +12,12 @@ export function LayoutShell({ title, description, children }: LayoutShellProps) 
     <div className="shell">
       <header className="topbar">
         <div className="brandBlock">
-          <p className="brandTag">Feel Your Stats</p>
-          <Link className="brand" href="/">
-            hobby-dash
-          </Link>
+          <div className="brandLine">
+            <p className="brandTag">Feel Your Stats</p>
+            <Link className="brand" href="/">
+              hobby-dash
+            </Link>
+          </div>
           <p className="brandSub">FEELCYCLE を中心に、継続と振り返りのための個人ダッシュボード。</p>
         </div>
         <nav className="nav">
