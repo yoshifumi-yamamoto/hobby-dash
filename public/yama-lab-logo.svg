@@ -1,0 +1,28 @@
+<svg width="1600" height="320" viewBox="0 0 1600 320" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">YAMA LAB logo</title>
+  <desc id="desc">Minimal horizontal YAMA LAB wordmark with geometric cuts and subtle blue-violet glow on a black background.</desc>
+  <defs>
+    <linearGradient id="wordmarkFill" x1="220" y1="70" x2="1380" y2="250" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F5F7FF"/>
+      <stop offset="0.55" stop-color="#D8DEFF"/>
+      <stop offset="1" stop-color="#BAC4FF"/>
+    </linearGradient>
+    <filter id="neonGlow" x="-20%" y="-60%" width="140%" height="220%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#5561FF" flood-opacity="0.20"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="24" flood-color="#7A52FF" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="320" fill="#040507"/>
+
+  <g filter="url(#neonGlow)" fill="url(#wordmarkFill)">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M120 62H157L209 131L261 62H300L230 155V258H190V155L120 62ZM179 62H214L190 96H163L179 62Z"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M322 258H363L381 219H467L485 258H526L441 62H407L322 258ZM398 182L424 126L450 182H398ZM422 83H456L432 118H405L422 83Z"/>
+    <path d="M554 258V62H588L650 167L712 62H746V258H707V133L659 224H640L593 133V258H554Z"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M776 258H817L835 219H921L939 258H980L895 62H861L776 258ZM852 182L878 126L904 182H852ZM876 83H910L886 118H859L876 83Z"/>
+    <path d="M1052 258V62H1092V221H1190V258H1052Z"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M1210 258H1251L1269 219H1355L1373 258H1414L1329 62H1295L1210 258ZM1286 182L1312 126L1338 182H1286ZM1310 83H1344L1320 118H1293L1310 83Z"/>
+    <path d="M1442 258V62H1532V97H1482V258H1442Z"/>
+  </g>
+
+</svg>

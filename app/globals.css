@@ -28,7 +28,9 @@ html {
 body {
   margin: 0;
   color: var(--text);
-  background: transparent;
+  background:
+    linear-gradient(180deg, rgba(5, 5, 5, 0.88), rgba(5, 5, 5, 0.97)),
+    url("/bg-neon-texture.png") center/cover fixed;
   font-family: var(--font-body), "Hiragino Sans", "Yu Gothic", sans-serif;
 }
 
@@ -69,6 +71,12 @@ input {
   align-items: baseline;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.wordmark {
+  width: auto;
+  height: 22px;
+  opacity: 0.86;
 }
 
 .brandTag,
@@ -209,6 +217,12 @@ input {
   gap: 18px;
 }
 
+.dashboardGrid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 1.15fr 0.85fr;
+}
+
 .statsGrid,
 .twoCol,
 .detailGrid {
@@ -269,6 +283,134 @@ input {
   transform: translateY(-2px);
   border-color: rgba(255, 90, 45, 0.34);
   background: rgba(255, 90, 45, 0.07);
+}
+
+.heroVisual {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 18px;
+  min-height: 360px;
+  padding: 0;
+}
+
+.heroVisualMedia,
+.visualCard {
+  position: relative;
+  min-height: 100%;
+  overflow: hidden;
+  border-radius: 26px;
+}
+
+.heroVisualMedia::after,
+.visualCard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.48));
+}
+
+.coverImage {
+  object-fit: cover;
+}
+
+.heroVisualCopy {
+  display: grid;
+  align-content: end;
+  gap: 14px;
+  padding: 28px 28px 30px 12px;
+}
+
+.heroVisualCopy h2 {
+  margin: 0;
+  font-family: var(--font-display), Impact, sans-serif;
+  font-size: clamp(2.6rem, 5vw, 4.2rem);
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+.heroVisualMeta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.heroVisualMeta div {
+  display: grid;
+  gap: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.heroVisualMeta strong {
+  font-family: var(--font-display), Impact, sans-serif;
+  font-size: 1.8rem;
+}
+
+.metaLabel {
+  color: var(--muted);
+  font-size: 0.76rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.chartPanel,
+.recentPanel {
+  min-height: 100%;
+}
+
+.chartCard {
+  padding: 14px 10px 4px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.chartBars {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: end;
+  gap: 10px;
+  min-height: 250px;
+}
+
+.chartColumn {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+.chartValue {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.chartBar {
+  width: 100%;
+  min-height: 16px;
+  border-radius: 999px 999px 10px 10px;
+  background: linear-gradient(180deg, rgba(120, 173, 255, 0.96), rgba(94, 66, 255, 0.44));
+  box-shadow: 0 0 24px rgba(105, 115, 255, 0.24);
+}
+
+.chartLabel {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.visualPanel {
+  display: grid;
+  gap: 14px;
+}
+
+.visualCard {
+  min-height: 250px;
+}
+
+.visualCaption p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.8;
 }
 
 .cardLink h3 {
@@ -438,6 +580,15 @@ input {
   .heroText {
     max-width: none;
   }
+
+  .heroVisual,
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .heroVisualCopy {
+    padding: 0 22px 24px;
+  }
 }
 
 @media (max-width: 800px) {
@@ -518,6 +669,10 @@ input {
     gap: 8px;
   }
 
+  .wordmark {
+    height: 18px;
+  }
+
   .brand {
     font-size: 1.45rem;
   }
@@ -525,5 +680,30 @@ input {
   .brandSub {
     font-size: 0.78rem;
     line-height: 1.45;
+  }
+
+  .heroVisual {
+    min-height: auto;
+  }
+
+  .heroVisualMedia {
+    min-height: 280px;
+  }
+
+  .heroVisualCopy {
+    padding: 0 18px 20px;
+  }
+
+  .heroVisualMeta {
+    grid-template-columns: 1fr;
+  }
+
+  .chartBars {
+    gap: 6px;
+    min-height: 210px;
+  }
+
+  .chartLabel {
+    font-size: 0.64rem;
   }
 }

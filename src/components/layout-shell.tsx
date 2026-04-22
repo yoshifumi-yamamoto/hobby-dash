@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -13,6 +14,14 @@ export function LayoutShell({ title, description, children }: LayoutShellProps) 
       <header className="topbar">
         <div className="brandBlock">
           <div className="brandLine">
+            <Image
+              alt="YAMA LAB"
+              className="wordmark"
+              height={28}
+              priority
+              src="/yama-lab-logo.svg"
+              width={140}
+            />
             <p className="brandTag">Feel Your Stats</p>
             <Link className="brand" href="/">
               hobby-dash
