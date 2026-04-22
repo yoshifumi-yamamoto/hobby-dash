@@ -46,6 +46,35 @@ function mapRow(row: FeelcycleWorkoutRow): HobbyRecord {
   };
 }
 
+function buildNaturalKey(record: Pick<HobbyRecord, "date" | "startTime" | "studio" | "program">): string {
+  return [record.date, record.startTime, record.studio, record.program]
+    .map((value) => value.trim().toLowerCase())
+    .join("::");
+}
+
+function dedupeRecords(records: HobbyRecord[]): HobbyRecord[] {
+  const deduped = new Map<string, HobbyRecord>();
+
+  for (const record of records) {
+    const key = buildNaturalKey(record);
+    const existing = deduped.get(key);
+    if (!existing) {
+      deduped.set(key, record);
+      continue;
+    }
+
+    const existingUpdatedAt = existing.updatedAt ?? existing.createdAt ?? "";
+    const nextUpdatedAt = record.updatedAt ?? record.createdAt ?? "";
+    if (nextUpdatedAt > existingUpdatedAt) {
+      deduped.set(key, record);
+    }
+  }
+
+  return [...deduped.values()].sort((a, b) =>
+    `${b.date}T${b.startTime}`.localeCompare(`${a.date}T${a.startTime}`)
+  );
+}
+
 export async function getAllRecords(): Promise<HobbyRecord[]> {
   const client = getSupabaseClient();
   const { data, error } = await client
@@ -58,22 +87,12 @@ export async function getAllRecords(): Promise<HobbyRecord[]> {
     throw error;
   }
 
-  return (data ?? []).map((row) => mapRow(row as FeelcycleWorkoutRow));
+  return dedupeRecords((data ?? []).map((row) => mapRow(row as FeelcycleWorkoutRow)));
 }
 
 export async function getRecord(id: string): Promise<HobbyRecord | undefined> {
-  const client = getSupabaseClient();
-  const { data, error } = await client
-    .from("feelcycle_workouts")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return data ? mapRow(data as FeelcycleWorkoutRow) : undefined;
+  const records = await getAllRecords();
+  return records.find((record) => record.id === id);
 }
 
 export async function getRecentRecords(limit = 4): Promise<HobbyRecord[]> {
@@ -89,7 +108,7 @@ export async function getRecentRecords(limit = 4): Promise<HobbyRecord[]> {
     throw error;
   }
 
-  return (data ?? []).map((row) => mapRow(row as FeelcycleWorkoutRow));
+  return dedupeRecords((data ?? []).map((row) => mapRow(row as FeelcycleWorkoutRow))).slice(0, limit);
 }
 
 export async function getMonthlyStats(): Promise<MonthlyStat[]> {
@@ -104,6 +123,17 @@ export async function getMonthlyStats(): Promise<MonthlyStat[]> {
   return [...counts.entries()]
     .sort((a, b) => b[0].localeCompare(a[0]))
     .map(([month, count]) => ({ month, count }));
+}
+
+export async function getRecentThreeMonthCount(): Promise<number> {
+  const records = await getAllRecords();
+  const now = new Date();
+  const startMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 2, 1));
+
+  return records.filter((record) => {
+    const recordDate = new Date(`${record.date}T00:00:00Z`);
+    return recordDate >= startMonth;
+  }).length;
 }
 
 export async function getGroupedStats(key: "studio" | "program"): Promise<GroupStat[]> {

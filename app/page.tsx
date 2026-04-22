@@ -2,7 +2,13 @@ import Link from "next/link";
 
 import { LayoutShell } from "@/components/layout-shell";
 import { StatBlock } from "@/components/stat-block";
-import { getCurrentStreakText, getGroupedStats, getMonthlyStats, getRecentRecords } from "@/lib/records";
+import {
+  getCurrentStreakText,
+  getGroupedStats,
+  getMonthlyStats,
+  getRecentRecords,
+  getRecentThreeMonthCount
+} from "@/lib/records";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +18,7 @@ export default async function HomePage() {
   const studios = (await getGroupedStats("studio")).slice(0, 3);
   const programs = (await getGroupedStats("program")).slice(0, 3);
   const streakText = await getCurrentStreakText();
+  const recentThreeMonthCount = await getRecentThreeMonthCount();
 
   return (
     <LayoutShell
@@ -19,7 +26,7 @@ export default async function HomePage() {
       description="分析より先に、最近動けているか、どこで続いているか、どんなメモが残っているかを軽く見返すための入口です。"
     >
       <section className="grid statsGrid">
-        <StatBlock label="直近3か月の記録数" value={monthly.reduce((sum, item) => sum + item.count, 0)} helper="積み上がり感をまず確認" />
+        <StatBlock label="直近3か月の記録数" value={recentThreeMonthCount} helper="積み上がり感をまず確認" />
         <StatBlock label="今の継続メモ" value={streakText} helper="細かい数値より先に習慣感を見る" />
       </section>
 
