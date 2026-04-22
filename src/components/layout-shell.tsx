@@ -11,7 +11,8 @@ export function LayoutShell({ title, description, children }: LayoutShellProps) 
   return (
     <div className="shell">
       <header className="topbar">
-        <div>
+        <div className="brandBlock">
+          <p className="brandTag">Feel Your Stats</p>
           <Link className="brand" href="/">
             hobby-dash
           </Link>
@@ -24,6 +25,8 @@ export function LayoutShell({ title, description, children }: LayoutShellProps) 
       </header>
 
       <main className="main">
+        <div className="ambient ambientOne" />
+        <div className="ambient ambientTwo" />
         <div className="hero">
           <div>
             <p className="eyebrow">Personal Rhythm</p>

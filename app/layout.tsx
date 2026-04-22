@@ -1,7 +1,20 @@
 import type { Metadata } from "next";
+import { Barlow_Condensed, Noto_Sans_JP } from "next/font/google";
 import type { ReactNode } from "react";
 
 import "./globals.css";
+
+const displayFont = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-display"
+});
+
+const bodyFont = Noto_Sans_JP({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-body"
+});
 
 export const metadata: Metadata = {
   title: "hobby-dash",
@@ -11,7 +24,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ja">
-      <body>{children}</body>
+      <body className={`${displayFont.variable} ${bodyFont.variable}`}>{children}</body>
     </html>
   );
 }

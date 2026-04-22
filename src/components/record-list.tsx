@@ -19,18 +19,18 @@ export function RecordList({ records }: { records: HobbyRecord[] }) {
         <tbody>
           {records.map((record) => (
             <tr key={record.id}>
-              <td>
+              <td data-label="日付">
                 <Link className="recordLink" href={`/records/${encodeURIComponent(record.id)}`}>
                   {record.date}
                 </Link>
               </td>
-              <td>{record.studio}</td>
-              <td>{record.program}</td>
-              <td>{record.startTime}</td>
-              <td>
+              <td data-label="店舗">{record.studio}</td>
+              <td data-label="プログラム">{record.program}</td>
+              <td data-label="開始">{record.startTime}</td>
+              <td data-label="強度">
                 <span className={`pill pill--${record.intensity || "low"}`}>{record.intensity || "none"}</span>
               </td>
-              <td className="memoCell">{record.subjectiveMemo}</td>
+              <td className="memoCell" data-label="主観メモ">{record.subjectiveMemo}</td>
             </tr>
           ))}
         </tbody>
