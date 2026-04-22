@@ -22,6 +22,13 @@ export default async function HomePage() {
   const recentThreeMonthCount = await getRecentThreeMonthCount();
   const monthlyPreview = monthly.slice(0, 12);
   const maxMonthlyCount = Math.max(...monthlyPreview.map((item) => item.count), 1);
+  const rhythmPoints = monthlyPreview.slice(-8).map((item, index) => ({
+    x: index * 48,
+    y: 92 - Math.round((item.count / maxMonthlyCount) * 54)
+  }));
+  const rhythmPath = rhythmPoints
+    .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x},${point.y}`)
+    .join(" ");
 
   return (
     <LayoutShell
@@ -60,11 +67,34 @@ export default async function HomePage() {
 
       <section className="grid statsGrid">
         <StatBlock label="直近3か月の記録数" value={recentThreeMonthCount} helper="積み上がり感をまず確認" />
-        <StatBlock label="今の継続メモ" value={streakText} helper="細かい数値より先に習慣感を見る" />
+        <article className="panel statBlock pulseStat">
+          <div className="panelHeader">
+            <p className="statLabel">Rhythm pulse</p>
+            <span className="metaLabel">live</span>
+          </div>
+          <div className="pulseLayout">
+            <div>
+              <h2>{streakText}</h2>
+              <p className="muted">活動頻度と継続感をひとつの鼓動として見る補助メーターです。</p>
+            </div>
+            <div className="rhythmMini">
+              <svg viewBox="0 0 336 110" aria-label="Rhythm visualization" role="img">
+                <defs>
+                  <linearGradient id="pulse-line" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="rgba(226,234,255,0.98)" />
+                    <stop offset="100%" stopColor="rgba(116,129,255,0.72)" />
+                  </linearGradient>
+                </defs>
+                <path className="rhythmShadow" d={rhythmPath} pathLength={1} />
+                <path className="rhythmLine" d={rhythmPath} pathLength={1} />
+              </svg>
+            </div>
+          </div>
+        </article>
       </section>
 
       <section className="dashboardGrid">
-        <article className="panel chartPanel">
+        <article className="panel chartPanel spotlightPanel">
           <div className="panelHeader">
             <h2>月間の受講履歴</h2>
             <Link href="/records">記録一覧へ</Link>
@@ -85,7 +115,7 @@ export default async function HomePage() {
           </div>
         </article>
 
-        <article className="panel recentPanel">
+        <article className="panel recentPanel tallPanel">
           <div className="panelHeader">
             <h2>直近の記録</h2>
           </div>
@@ -104,7 +134,7 @@ export default async function HomePage() {
           </div>
         </article>
 
-        <article className="panel visualPanel">
+        <article className="panel visualPanel widePanel">
           <div className="visualCard">
             <Image
               alt="Indoor cycling studio lights"
@@ -120,7 +150,7 @@ export default async function HomePage() {
           </div>
         </article>
 
-        <article className="panel">
+        <article className="panel compactPanel">
           <h2>店舗別の回数</h2>
           <div className="stack">
             {studios.map((item) => (
@@ -132,7 +162,7 @@ export default async function HomePage() {
           </div>
         </article>
 
-        <article className="panel visualPanel">
+        <article className="panel visualPanel compactVisualPanel">
           <div className="visualCard">
             <Image
               alt="Close-up rider on bike"
@@ -148,7 +178,7 @@ export default async function HomePage() {
           </div>
         </article>
 
-        <article className="panel">
+        <article className="panel compactPanel">
           <h2>プログラム別の回数</h2>
           <div className="stack">
             {programs.map((item) => (
