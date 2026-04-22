@@ -68,9 +68,17 @@ MVP の画面は 3 つです。
 - Next.js App Router
 - TypeScript
 - React
-- サンプル JSON データ
+- Supabase
 
-最初は `src/data/sampleRecords.ts` の静的データで動かし、後から DB に差し替えやすいように読み出しは `src/lib/records.ts` に寄せています。
+読み出しは `src/lib/records.ts` に寄せていて、`feelcycle_workouts` テーブルを参照します。
+
+## 環境変数
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+サーバーコンポーネントから Supabase を読むため、MVP では `SUPABASE_SERVICE_ROLE_KEY` を使います。
 
 ## 開発開始
 
@@ -106,7 +114,6 @@ npm run build
 
 ## 今後の拡張ポイント
 
-- FEELCYCLE CLI リポジトリの JSON を読む
 - 体調、睡眠、食事メモの追加
 - 月ごとの振り返りメモ
-- Supabase などへの保存差し替え
+- RLS 前提の読み取り構成への移行

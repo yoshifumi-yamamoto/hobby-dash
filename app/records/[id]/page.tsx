@@ -8,9 +8,11 @@ interface RecordDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function RecordDetailPage({ params }: RecordDetailPageProps) {
   const { id } = await params;
-  const record = getRecord(id);
+  const record = await getRecord(id);
 
   if (!record) {
     notFound();
@@ -28,7 +30,7 @@ export default async function RecordDetailPage({ params }: RecordDetailPageProps
       <section className="grid detailGrid">
         <article className="panel">
           <div className="detailHeader">
-            <span className={`pill pill--${record.intensity}`}>{record.intensity}</span>
+            <span className={`pill pill--${record.intensity || "low"}`}>{record.intensity || "none"}</span>
             <strong>{record.date}</strong>
           </div>
           <dl className="detailList">

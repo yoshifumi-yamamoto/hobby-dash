@@ -2,8 +2,10 @@ import { LayoutShell } from "@/components/layout-shell";
 import { RecordList } from "@/components/record-list";
 import { getAllRecords } from "@/lib/records";
 
-export default function RecordsPage() {
-  const records = getAllRecords();
+export const dynamic = "force-dynamic";
+
+export default async function RecordsPage() {
+  const records = await getAllRecords();
 
   return (
     <LayoutShell

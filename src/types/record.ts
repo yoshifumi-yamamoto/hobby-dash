@@ -4,9 +4,11 @@ export interface HobbyRecord {
   studio: string;
   program: string;
   startTime: string;
-  intensity: "low" | "medium" | "high";
+  intensity: string;
   subjectiveMemo: string;
   conditionMemo: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface MonthlyStat {

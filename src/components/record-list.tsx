@@ -28,7 +28,7 @@ export function RecordList({ records }: { records: HobbyRecord[] }) {
               <td>{record.program}</td>
               <td>{record.startTime}</td>
               <td>
-                <span className={`pill pill--${record.intensity}`}>{record.intensity}</span>
+                <span className={`pill pill--${record.intensity || "low"}`}>{record.intensity || "none"}</span>
               </td>
               <td className="memoCell">{record.subjectiveMemo}</td>
             </tr>
