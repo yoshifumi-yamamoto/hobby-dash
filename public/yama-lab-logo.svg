@@ -1,4 +1,4 @@
-<svg width="1720" height="320" viewBox="0 0 1720 320" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+<svg width="1600" height="320" viewBox="0 0 1600 320" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">YAMA LAB logo</title>
   <desc id="desc">Minimal horizontal YAMA LAB wordmark with geometric cuts and subtle blue-violet glow on a black background.</desc>
   <defs>
@@ -12,6 +12,9 @@
       <feDropShadow dx="0" dy="0" stdDeviation="24" flood-color="#7A52FF" flood-opacity="0.14"/>
     </filter>
   </defs>
+
+  <rect width="1600" height="320" fill="#040507"/>
+
   <g filter="url(#neonGlow)" fill="url(#wordmarkFill)">
     <path fill-rule="evenodd" clip-rule="evenodd" d="M120 62H157L209 131L261 62H300L230 155V258H190V155L120 62ZM179 62H214L190 96H163L179 62Z"/>
     <path fill-rule="evenodd" clip-rule="evenodd" d="M322 258H363L381 219H467L485 258H526L441 62H407L322 258ZM398 182L424 126L450 182H398ZM422 83H456L432 118H405L422 83Z"/>
@@ -19,7 +22,7 @@
     <path fill-rule="evenodd" clip-rule="evenodd" d="M776 258H817L835 219H921L939 258H980L895 62H861L776 258ZM852 182L878 126L904 182H852ZM876 83H910L886 118H859L876 83Z"/>
     <path d="M1052 258V62H1092V221H1190V258H1052Z"/>
     <path fill-rule="evenodd" clip-rule="evenodd" d="M1210 258H1251L1269 219H1355L1373 258H1414L1329 62H1295L1210 258ZM1286 182L1312 126L1338 182H1286ZM1310 83H1344L1320 118H1293L1310 83Z"/>
-    <path d="M1442 258V62H1532V97H1482V258H1442Z"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M1442 258V62H1516C1557 62 1584 83 1584 121C1584 145 1571 163 1549 172C1578 180 1594 201 1594 228C1594 277 1559 258 1510 258H1442ZM1482 98V156H1510C1532 156 1544 145 1544 127C1544 108 1531 98 1507 98H1482ZM1482 191V222H1514C1534 222 1553 221 1553 206C1553 190 1538 191 1514 191H1482Z"/>
   </g>
 
 </svg>

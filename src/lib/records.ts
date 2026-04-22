@@ -174,7 +174,7 @@ export async function getRecentThreeMonthCount(): Promise<number> {
   }).length;
 }
 
-export async function getGroupedStats(key: "studio" | "program"): Promise<GroupStat[]> {
+export async function getGroupedStats(key: "studio" | "program" | "instructorName"): Promise<GroupStat[]> {
   const records = await getAllRecords();
   const counts = new Map<string, number>();
 
@@ -233,7 +233,10 @@ export function filterRecords(records: HobbyRecord[], query: string): HobbyRecor
   );
 }
 
-export function buildGroupStats(records: HobbyRecord[], key: "studio" | "program"): GroupStat[] {
+export function buildGroupStats(
+  records: HobbyRecord[],
+  key: "studio" | "program" | "instructorName"
+): GroupStat[] {
   const counts = new Map<string, number>();
 
   for (const record of records) {

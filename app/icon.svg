@@ -1,22 +1,20 @@
 <svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="monogram" x1="70" y1="52" x2="194" y2="202" gradientUnits="userSpaceOnUse">
+    <linearGradient id="monogram" x1="62" y1="52" x2="196" y2="204" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#F7F9FF"/>
       <stop offset="1" stop-color="#C4CEFF"/>
     </linearGradient>
     <filter id="glow" x="-35%" y="-35%" width="170%" height="170%" color-interpolation-filters="sRGB">
-      <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#5E6BFF" flood-opacity="0.24"/>
-      <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#7A52FF" flood-opacity="0.18"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#5E6BFF" flood-opacity="0.18"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="9" flood-color="#7A52FF" flood-opacity="0.12"/>
     </filter>
   </defs>
 
   <rect width="256" height="256" rx="54" fill="#040507"/>
 
   <g filter="url(#glow)" fill="url(#monogram)">
-    <path d="M58 62H87L126 113L164 62H194L141 133V195H111V133L58 62Z"/>
-    <path d="M141 62H170V167H199V195H141V62Z"/>
+    <path d="M48 58H85L128 118L171 58H208L148 141V200H108V141L48 58Z"/>
+    <rect x="153" y="140" width="34" height="60"/>
+    <path d="M153 170H210V200H153V170Z"/>
   </g>
-
-  <path d="M113 84L132 59H155L133 90H113Z" fill="#040507"/>
-  <path d="M142 168H199V195H141L142 168Z" fill="#040507"/>
 </svg>

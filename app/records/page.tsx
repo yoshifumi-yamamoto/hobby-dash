@@ -34,6 +34,7 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
   const filteredRecords = filterRecords(records, query);
   const studioStats = buildGroupStats(filteredRecords, "studio");
   const programStats = buildGroupStats(filteredRecords, "program");
+  const instructorStats = buildGroupStats(filteredRecords, "instructorName");
   const totalProgramPages = Math.max(Math.ceil(programStats.length / PROGRAMS_PER_PAGE), 1);
   const currentProgramPage = Math.min(programPage, totalProgramPages);
   const paginatedProgramStats = programStats.slice(
@@ -70,13 +71,25 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
           </div>
         </form>
 
-        <div className="grid twoCol">
+        <div className="grid threeCol">
           <article className="panel">
             <h2>店舗ごとの回数</h2>
             <div className="stack">
               {studioStats.map((item) => (
                 <div className="row" key={item.label}>
                   <span>{item.label}</span>
+                  <strong>{item.count}回</strong>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <article className="panel">
+            <h2>インストラクター別の回数</h2>
+            <div className="stack">
+              {instructorStats.map((item) => (
+                <div className="row" key={item.label}>
+                  <span>{item.label || "未取得"}</span>
                   <strong>{item.count}回</strong>
                 </div>
               ))}
