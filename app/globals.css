@@ -175,6 +175,43 @@ a {
   border-collapse: collapse;
 }
 
+.searchPanel {
+  display: grid;
+  gap: 12px;
+}
+
+.searchLabel {
+  font-weight: 700;
+}
+
+.searchRow,
+.paginationRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.searchInput {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font: inherit;
+}
+
+.searchButton,
+.pagerLink {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 11px 14px;
+  font: inherit;
+  white-space: nowrap;
+}
+
 .recordTable th,
 .recordTable td {
   padding: 14px;
@@ -233,5 +270,11 @@ a {
 
   .nav {
     flex-wrap: wrap;
+  }
+
+  .searchRow,
+  .paginationRow {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

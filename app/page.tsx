@@ -19,6 +19,7 @@ export default async function HomePage() {
   const programs = (await getGroupedStats("program")).slice(0, 3);
   const streakText = await getCurrentStreakText();
   const recentThreeMonthCount = await getRecentThreeMonthCount();
+  const monthlyPreview = monthly.slice(0, 12);
 
   return (
     <LayoutShell
@@ -37,7 +38,7 @@ export default async function HomePage() {
             <Link href="/records">記録一覧へ</Link>
           </div>
           <div className="stack">
-            {monthly.map((item) => (
+            {monthlyPreview.map((item) => (
               <div className="row" key={item.month}>
                 <span>{item.month}</span>
                 <strong>{item.count}回</strong>
@@ -52,7 +53,7 @@ export default async function HomePage() {
           </div>
           <div className="stack">
             {recent.map((record) => (
-              <Link className="cardLink" href={`/records/${record.id}`} key={record.id}>
+              <Link className="cardLink" href={`/records/${encodeURIComponent(record.id)}`} key={record.id}>
                 <div className="row">
                   <strong>{record.date}</strong>
                   <span className={`pill pill--${record.intensity || "low"}`}>{record.intensity || "none"}</span>

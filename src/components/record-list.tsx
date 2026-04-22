@@ -20,7 +20,7 @@ export function RecordList({ records }: { records: HobbyRecord[] }) {
           {records.map((record) => (
             <tr key={record.id}>
               <td>
-                <Link className="recordLink" href={`/records/${record.id}`}>
+                <Link className="recordLink" href={`/records/${encodeURIComponent(record.id)}`}>
                   {record.date}
                 </Link>
               </td>

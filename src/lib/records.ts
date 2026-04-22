@@ -52,6 +52,40 @@ function buildNaturalKey(record: Pick<HobbyRecord, "date" | "startTime" | "studi
     .join("::");
 }
 
+function normalizeSegment(value: string): string {
+  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+function matchesLegacyId(record: HobbyRecord, id: string): boolean {
+  const segments = id.split(":");
+  if (segments.length < 4 || segments[0] !== "feelcycle") {
+    return false;
+  }
+
+  const date = segments[1] ?? "";
+  const startTime = segments[2] ?? "";
+  const trailing = segments.slice(3);
+
+  if (record.date !== date || record.startTime !== startTime) {
+    return false;
+  }
+
+  const expectedProgram = normalizeSegment(record.program);
+  const expectedStudio = normalizeSegment(record.studio);
+
+  if (trailing.length === 1) {
+    return trailing[0] === expectedProgram;
+  }
+
+  if (trailing.length >= 2) {
+    const studio = trailing[0] ?? "";
+    const program = trailing.slice(1).join(":");
+    return studio === expectedStudio && program === expectedProgram;
+  }
+
+  return false;
+}
+
 function dedupeRecords(records: HobbyRecord[]): HobbyRecord[] {
   const deduped = new Map<string, HobbyRecord>();
 
@@ -92,7 +126,9 @@ export async function getAllRecords(): Promise<HobbyRecord[]> {
 
 export async function getRecord(id: string): Promise<HobbyRecord | undefined> {
   const records = await getAllRecords();
-  return records.find((record) => record.id === id);
+  const decodedId = decodeURIComponent(id);
+
+  return records.find((record) => record.id === decodedId || matchesLegacyId(record, decodedId));
 }
 
 export async function getRecentRecords(limit = 4): Promise<HobbyRecord[]> {
@@ -171,4 +207,38 @@ export async function getCurrentStreakText(): Promise<string> {
   }
 
   return `${streak}日連続で記録`;
+}
+
+export function filterRecords(records: HobbyRecord[], query: string): HobbyRecord[] {
+  const normalizedQuery = query.trim().toLowerCase();
+  if (!normalizedQuery) {
+    return records;
+  }
+
+  return records.filter((record) =>
+    [
+      record.date,
+      record.studio,
+      record.program,
+      record.startTime,
+      record.subjectiveMemo,
+      record.conditionMemo
+    ]
+      .join(" ")
+      .toLowerCase()
+      .includes(normalizedQuery)
+  );
+}
+
+export function buildGroupStats(records: HobbyRecord[], key: "studio" | "program"): GroupStat[] {
+  const counts = new Map<string, number>();
+
+  for (const record of records) {
+    const label = record[key];
+    counts.set(label, (counts.get(label) ?? 0) + 1);
+  }
+
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([label, count]) => ({ label, count }));
 }
