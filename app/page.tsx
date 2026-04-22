@@ -162,6 +162,7 @@ export default async function HomePage() {
                 </div>
                 <h3>{record.program}</h3>
                 <p>{record.studio} / {record.startTime}</p>
+                <p className="metaLine">{record.instructorName || "インストラクター未取得"}</p>
                 <p className="muted">{record.subjectiveMemo}</p>
               </Link>
             ))}

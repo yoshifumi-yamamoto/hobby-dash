@@ -600,6 +600,12 @@ input {
   line-height: 1.8;
 }
 
+.metaLine {
+  margin: 0 0 6px;
+  color: #d6e0ff;
+  font-size: 0.95rem;
+}
+
 .cardLink h3 {
   margin: 10px 0 6px;
   font-size: 2rem;

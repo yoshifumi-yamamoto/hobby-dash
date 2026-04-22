@@ -63,7 +63,7 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
               defaultValue={query}
               id="q"
               name="q"
-              placeholder="日付、店舗、プログラム、メモで検索"
+              placeholder="日付、店舗、プログラム、インストラクター、メモで検索"
               type="search"
             />
             <button className="searchButton" type="submit">絞り込む</button>

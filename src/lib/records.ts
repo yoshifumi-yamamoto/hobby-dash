@@ -7,6 +7,7 @@ interface FeelcycleWorkoutRow {
   workout_date: string;
   studio: string;
   program: string;
+  instructor_name: string | null;
   start_time: string;
   intensity: string | null;
   subjective_memo: string;
@@ -37,6 +38,7 @@ function mapRow(row: FeelcycleWorkoutRow): HobbyRecord {
     date: row.workout_date,
     studio: row.studio,
     program: row.program,
+    instructorName: row.instructor_name ?? "",
     startTime: row.start_time.slice(0, 5),
     intensity: row.intensity ?? "",
     subjectiveMemo: row.subjective_memo,
@@ -220,6 +222,7 @@ export function filterRecords(records: HobbyRecord[], query: string): HobbyRecor
       record.date,
       record.studio,
       record.program,
+      record.instructorName,
       record.startTime,
       record.subjectiveMemo,
       record.conditionMemo

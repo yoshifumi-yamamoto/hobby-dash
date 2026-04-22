@@ -43,6 +43,10 @@ export default async function RecordDetailPage({ params }: RecordDetailPageProps
               <dd>{record.program}</dd>
             </div>
             <div>
+              <dt>インストラクター</dt>
+              <dd>{record.instructorName || "未取得"}</dd>
+            </div>
+            <div>
               <dt>開始時刻</dt>
               <dd>{record.startTime}</dd>
             </div>

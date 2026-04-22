@@ -3,6 +3,7 @@ export interface HobbyRecord {
   date: string;
   studio: string;
   program: string;
+  instructorName: string;
   startTime: string;
   intensity: string;
   subjectiveMemo: string;
