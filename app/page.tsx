@@ -22,6 +22,16 @@ export default async function HomePage() {
   const recentThreeMonthCount = await getRecentThreeMonthCount();
   const monthlyPreview = monthly.slice(0, 12);
   const maxMonthlyCount = Math.max(...monthlyPreview.map((item) => item.count), 1);
+  const monthlySeries = monthlyPreview.slice().reverse();
+  const monthlyGraphPoints = monthlySeries.map((item, index) => ({
+    month: item.month,
+    count: item.count,
+    x: 24 + index * 62,
+    y: 188 - Math.round((item.count / maxMonthlyCount) * 132)
+  }));
+  const monthlyGraphPath = monthlyGraphPoints
+    .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x},${point.y}`)
+    .join(" ");
   const rhythmPoints = monthlyPreview.slice(-8).map((item, index) => ({
     x: index * 48,
     y: 92 - Math.round((item.count / maxMonthlyCount) * 54)
@@ -100,18 +110,42 @@ export default async function HomePage() {
             <Link href="/records">記録一覧へ</Link>
           </div>
           <div className="chartCard">
-            <div className="chartBars" aria-label="Monthly attendance chart" role="img">
-              {monthlyPreview.slice().reverse().map((item) => (
-                <div className="chartColumn" key={item.month}>
-                  <span className="chartValue">{item.count}</span>
-                  <div
-                    className="chartBar"
-                    style={{ height: `${Math.max((item.count / maxMonthlyCount) * 180, 16)}px` }}
-                  />
-                  <span className="chartLabel">{item.month.slice(2)}</span>
-                </div>
+            <svg className="lineChart" viewBox="0 0 730 240" aria-label="Monthly attendance chart" role="img">
+              <defs>
+                <linearGradient id="monthly-line" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="rgba(232,239,255,1)" />
+                  <stop offset="100%" stopColor="rgba(116,129,255,0.86)" />
+                </linearGradient>
+                <linearGradient id="monthly-area" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="rgba(146,172,255,0.32)" />
+                  <stop offset="100%" stopColor="rgba(146,172,255,0.02)" />
+                </linearGradient>
+              </defs>
+              {[0, 1, 2, 3].map((step) => (
+                <line
+                  className="chartGridLine"
+                  key={step}
+                  x1="16"
+                  x2="714"
+                  y1={32 + step * 52}
+                  y2={32 + step * 52}
+                />
               ))}
-            </div>
+              <path
+                className="chartArea"
+                d={`${monthlyGraphPath} L ${monthlyGraphPoints.at(-1)?.x ?? 24},214 L ${monthlyGraphPoints[0]?.x ?? 24},214 Z`}
+              />
+              <path className="chartLineGlow" d={monthlyGraphPath} pathLength={1} />
+              <path className="chartLineMain" d={monthlyGraphPath} pathLength={1} />
+              {monthlyGraphPoints.map((point) => (
+                <g key={point.month}>
+                  <circle className="chartPointHalo" cx={point.x} cy={point.y} r="9" />
+                  <circle className="chartPoint" cx={point.x} cy={point.y} r="4.5" />
+                  <text className="chartPointValue" x={point.x} y={point.y - 14}>{point.count}</text>
+                  <text className="chartAxisLabel" x={point.x} y="232">{point.month.slice(2)}</text>
+                </g>
+              ))}
+            </svg>
           </div>
         </article>
 
