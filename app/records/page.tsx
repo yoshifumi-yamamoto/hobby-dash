@@ -9,12 +9,21 @@ interface RecordsPageProps {
     q?: string;
     programPage?: string;
     monthPage?: string;
+    studioExpanded?: string;
+    instructorExpanded?: string;
   }>;
 }
 
 const PROGRAMS_PER_PAGE = 20;
+const DEFAULT_GROUP_PREVIEW_COUNT = 8;
 
-function buildPageHref(query: string, programPage: number, monthPage: number): string {
+function buildPageHref(
+  query: string,
+  programPage: number,
+  monthPage: number,
+  studioExpanded: boolean,
+  instructorExpanded: boolean
+): string {
   const params = new URLSearchParams();
   if (query) {
     params.set("q", query);
@@ -24,6 +33,12 @@ function buildPageHref(query: string, programPage: number, monthPage: number): s
   }
   if (monthPage > 1) {
     params.set("monthPage", String(monthPage));
+  }
+  if (studioExpanded) {
+    params.set("studioExpanded", "1");
+  }
+  if (instructorExpanded) {
+    params.set("instructorExpanded", "1");
   }
 
   const search = params.toString();
@@ -35,11 +50,17 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
   const query = params.q?.trim() ?? "";
   const programPage = Math.max(Number.parseInt(params.programPage ?? "1", 10) || 1, 1);
   const monthPage = Math.max(Number.parseInt(params.monthPage ?? "1", 10) || 1, 1);
+  const studioExpanded = params.studioExpanded === "1";
+  const instructorExpanded = params.instructorExpanded === "1";
   const records = await getAllRecords();
   const filteredRecords = filterRecords(records, query);
   const studioStats = buildGroupStats(filteredRecords, "studio");
   const programStats = buildGroupStats(filteredRecords, "program");
   const instructorStats = buildGroupStats(filteredRecords, "instructorName");
+  const visibleStudioStats = studioExpanded ? studioStats : studioStats.slice(0, DEFAULT_GROUP_PREVIEW_COUNT);
+  const visibleInstructorStats = instructorExpanded
+    ? instructorStats
+    : instructorStats.slice(0, DEFAULT_GROUP_PREVIEW_COUNT);
   const availableMonths = [...new Set(filteredRecords.map((record) => record.date.slice(0, 7)))];
   const totalProgramPages = Math.max(Math.ceil(programStats.length / PROGRAMS_PER_PAGE), 1);
   const currentProgramPage = Math.min(programPage, totalProgramPages);
@@ -85,9 +106,19 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
 
         <div className="grid threeCol">
           <article className="panel">
-            <h2>店舗ごとの回数</h2>
+            <div className="panelHeader">
+              <h2>店舗ごとの回数</h2>
+              {studioStats.length > DEFAULT_GROUP_PREVIEW_COUNT ? (
+                <a
+                  className="textToggle"
+                  href={buildPageHref(query, currentProgramPage, currentMonthPage, !studioExpanded, instructorExpanded)}
+                >
+                  {studioExpanded ? "閉じる" : "もっと見る"}
+                </a>
+              ) : null}
+            </div>
             <div className="stack">
-              {studioStats.map((item) => (
+              {visibleStudioStats.map((item) => (
                 <div className="row" key={item.label}>
                   <span>{item.label}</span>
                   <strong>{item.count}回</strong>
@@ -97,9 +128,19 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
           </article>
 
           <article className="panel">
-            <h2>インストラクター別の回数</h2>
+            <div className="panelHeader">
+              <h2>インストラクター別の回数</h2>
+              {instructorStats.length > DEFAULT_GROUP_PREVIEW_COUNT ? (
+                <a
+                  className="textToggle"
+                  href={buildPageHref(query, currentProgramPage, currentMonthPage, studioExpanded, !instructorExpanded)}
+                >
+                  {instructorExpanded ? "閉じる" : "もっと見る"}
+                </a>
+              ) : null}
+            </div>
             <div className="stack">
-              {instructorStats.map((item) => (
+              {visibleInstructorStats.map((item) => (
                 <div className="row" key={item.label}>
                   <span>{item.label || "未取得"}</span>
                   <strong>{item.count}回</strong>
@@ -123,11 +164,22 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
             </div>
             <div className="paginationRow">
               {currentProgramPage > 1 ? (
-                <a className="pagerLink" href={buildPageHref(query, currentProgramPage - 1, currentMonthPage)}>← 前へ</a>
-              ) : <span />}
+                <a
+                  className="pagerLink"
+                  href={buildPageHref(query, currentProgramPage - 1, currentMonthPage, studioExpanded, instructorExpanded)}
+                >
+                  ← 前へ
+                </a>
+              ) : <span className="pagerSpacer" />}
+              <span className="muted">{currentProgramPage} / {totalProgramPages}</span>
               {currentProgramPage < totalProgramPages ? (
-                <a className="pagerLink" href={buildPageHref(query, currentProgramPage + 1, currentMonthPage)}>次へ →</a>
-              ) : null}
+                <a
+                  className="pagerLink"
+                  href={buildPageHref(query, currentProgramPage + 1, currentMonthPage, studioExpanded, instructorExpanded)}
+                >
+                  次へ →
+                </a>
+              ) : <span className="pagerSpacer" />}
             </div>
           </article>
         </div>
@@ -141,11 +193,21 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
           </div>
           <div className="paginationRow monthPager">
             {currentMonthPage > 1 ? (
-              <a className="pagerLink" href={buildPageHref(query, currentProgramPage, currentMonthPage - 1)}>← 前月の一覧</a>
-            ) : <span />}
+              <a
+                className="pagerLink"
+                href={buildPageHref(query, currentProgramPage, currentMonthPage - 1, studioExpanded, instructorExpanded)}
+              >
+                ← 前月の一覧
+              </a>
+            ) : <span className="pagerSpacer" />}
             {currentMonthPage < totalMonthPages ? (
-              <a className="pagerLink" href={buildPageHref(query, currentProgramPage, currentMonthPage + 1)}>次月の一覧 →</a>
-            ) : null}
+              <a
+                className="pagerLink"
+                href={buildPageHref(query, currentProgramPage, currentMonthPage + 1, studioExpanded, instructorExpanded)}
+              >
+                次月の一覧 →
+              </a>
+            ) : <span className="pagerSpacer" />}
           </div>
           <RecordList framed={false} records={monthScopedRecords} />
         </article>

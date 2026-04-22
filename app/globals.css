@@ -709,6 +709,17 @@ input {
   transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
+.textToggle {
+  color: var(--accent-strong);
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+
+.pagerSpacer {
+  display: inline-block;
+  min-width: 92px;
+}
+
 .searchButton:hover,
 .pagerLink:hover {
   transform: translateY(-1px);
