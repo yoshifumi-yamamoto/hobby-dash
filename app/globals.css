@@ -680,6 +680,10 @@ input {
   align-items: center;
 }
 
+.monthPager {
+  margin-bottom: 10px;
+}
+
 .searchInput {
   width: 100%;
   min-width: 0;

@@ -8,18 +8,22 @@ interface RecordsPageProps {
   searchParams?: Promise<{
     q?: string;
     programPage?: string;
+    monthPage?: string;
   }>;
 }
 
 const PROGRAMS_PER_PAGE = 20;
 
-function buildPageHref(query: string, page: number): string {
+function buildPageHref(query: string, programPage: number, monthPage: number): string {
   const params = new URLSearchParams();
   if (query) {
     params.set("q", query);
   }
-  if (page > 1) {
-    params.set("programPage", String(page));
+  if (programPage > 1) {
+    params.set("programPage", String(programPage));
+  }
+  if (monthPage > 1) {
+    params.set("monthPage", String(monthPage));
   }
 
   const search = params.toString();
@@ -30,17 +34,25 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
   const params = (await searchParams) ?? {};
   const query = params.q?.trim() ?? "";
   const programPage = Math.max(Number.parseInt(params.programPage ?? "1", 10) || 1, 1);
+  const monthPage = Math.max(Number.parseInt(params.monthPage ?? "1", 10) || 1, 1);
   const records = await getAllRecords();
   const filteredRecords = filterRecords(records, query);
   const studioStats = buildGroupStats(filteredRecords, "studio");
   const programStats = buildGroupStats(filteredRecords, "program");
   const instructorStats = buildGroupStats(filteredRecords, "instructorName");
+  const availableMonths = [...new Set(filteredRecords.map((record) => record.date.slice(0, 7)))];
   const totalProgramPages = Math.max(Math.ceil(programStats.length / PROGRAMS_PER_PAGE), 1);
   const currentProgramPage = Math.min(programPage, totalProgramPages);
+  const totalMonthPages = Math.max(availableMonths.length, 1);
+  const currentMonthPage = Math.min(monthPage, totalMonthPages);
+  const selectedMonth = availableMonths[currentMonthPage - 1] ?? "";
   const paginatedProgramStats = programStats.slice(
     (currentProgramPage - 1) * PROGRAMS_PER_PAGE,
     currentProgramPage * PROGRAMS_PER_PAGE
   );
+  const monthScopedRecords = selectedMonth
+    ? filteredRecords.filter((record) => record.date.startsWith(selectedMonth))
+    : filteredRecords;
 
   return (
     <LayoutShell
@@ -111,16 +123,32 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
             </div>
             <div className="paginationRow">
               {currentProgramPage > 1 ? (
-                <a className="pagerLink" href={buildPageHref(query, currentProgramPage - 1)}>← 前へ</a>
+                <a className="pagerLink" href={buildPageHref(query, currentProgramPage - 1, currentMonthPage)}>← 前へ</a>
               ) : <span />}
               {currentProgramPage < totalProgramPages ? (
-                <a className="pagerLink" href={buildPageHref(query, currentProgramPage + 1)}>次へ →</a>
+                <a className="pagerLink" href={buildPageHref(query, currentProgramPage + 1, currentMonthPage)}>次へ →</a>
               ) : null}
             </div>
           </article>
         </div>
 
-        <RecordList records={filteredRecords} />
+        <article className="panel listSectionPanel">
+          <div className="panelHeader">
+            <h2>記録一覧</h2>
+            <span className="muted">
+              {selectedMonth || "全期間"} / {currentMonthPage} / {totalMonthPages}
+            </span>
+          </div>
+          <div className="paginationRow monthPager">
+            {currentMonthPage > 1 ? (
+              <a className="pagerLink" href={buildPageHref(query, currentProgramPage, currentMonthPage - 1)}>← 前月の一覧</a>
+            ) : <span />}
+            {currentMonthPage < totalMonthPages ? (
+              <a className="pagerLink" href={buildPageHref(query, currentProgramPage, currentMonthPage + 1)}>次月の一覧 →</a>
+            ) : null}
+          </div>
+          <RecordList framed={false} records={monthScopedRecords} />
+        </article>
       </section>
     </LayoutShell>
   );

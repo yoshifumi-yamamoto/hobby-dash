@@ -2,9 +2,14 @@ import Link from "next/link";
 
 import type { HobbyRecord } from "@/types/record";
 
-export function RecordList({ records }: { records: HobbyRecord[] }) {
+interface RecordListProps {
+  records: HobbyRecord[];
+  framed?: boolean;
+}
+
+export function RecordList({ records, framed = true }: RecordListProps) {
   return (
-    <div className="panel tablePanel">
+    <div className={framed ? "panel tablePanel" : "tablePanel"}>
       <table className="recordTable">
         <thead>
           <tr>
