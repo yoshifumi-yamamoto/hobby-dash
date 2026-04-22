@@ -7,9 +7,10 @@
   --line-strong: rgba(255, 255, 255, 0.24);
   --text: #f6f2e8;
   --muted: #b3ab9e;
-  --accent: #ff5a2d;
-  --accent-soft: rgba(255, 90, 45, 0.14);
-  --accent-glow: rgba(255, 90, 45, 0.34);
+  --accent: #97b0ff;
+  --accent-soft: rgba(151, 176, 255, 0.14);
+  --accent-glow: rgba(122, 146, 255, 0.22);
+  --accent-strong: #d9e3ff;
   --shadow: 0 24px 64px rgba(0, 0, 0, 0.36);
 }
 
@@ -20,7 +21,7 @@
 html {
   min-height: 100%;
   background:
-    radial-gradient(circle at top left, rgba(255, 90, 45, 0.18), transparent 34%),
+    radial-gradient(circle at top left, rgba(122, 146, 255, 0.16), transparent 34%),
     radial-gradient(circle at top right, rgba(255, 255, 255, 0.06), transparent 26%),
     linear-gradient(180deg, #090909 0%, #050505 100%);
 }
@@ -68,39 +69,34 @@ input {
 
 .brandLine {
   display: flex;
-  align-items: baseline;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
-.wordmark {
-  width: auto;
-  height: 22px;
-  opacity: 0.86;
+.wordmarkLink {
+  display: inline-flex;
+  align-items: center;
 }
 
-.brandTag,
+.wordmark {
+  display: block;
+  width: 188px;
+  height: auto;
+  opacity: 0.96;
+}
+
 .eyebrow,
 .statLabel {
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: var(--accent);
+  color: var(--accent-strong);
 }
 
-.brandTag,
 .eyebrow {
   font-family: var(--font-display), Impact, sans-serif;
   font-size: 0.78rem;
-}
-
-.brand {
-  display: inline-block;
-  font-family: var(--font-display), Impact, sans-serif;
-  font-size: clamp(1.35rem, 2.1vw, 1.9rem);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  line-height: 0.95;
 }
 
 .brandSub,
@@ -122,6 +118,10 @@ input {
   align-items: center;
 }
 
+.navDesktop {
+  display: flex;
+}
+
 .nav a {
   padding: 8px 12px;
   border-radius: 999px;
@@ -134,7 +134,65 @@ input {
 .nav a:hover {
   color: var(--text);
   border-color: var(--line-strong);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(151, 176, 255, 0.08);
+}
+
+.mobileMenu {
+  display: none;
+  position: relative;
+}
+
+.mobileMenuButton {
+  list-style: none;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(151, 176, 255, 0.05);
+  cursor: pointer;
+}
+
+.mobileMenuButton::-webkit-details-marker {
+  display: none;
+}
+
+.mobileMenuButton span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 999px;
+}
+
+.mobileMenuButton span + span {
+  margin-top: 4px;
+}
+
+.mobileMenuPanel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  min-width: 180px;
+  padding: 10px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(10, 10, 11, 0.96);
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 6px;
+}
+
+.mobileMenuPanel a {
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: var(--muted);
+}
+
+.mobileMenuPanel a:hover {
+  background: rgba(151, 176, 255, 0.08);
+  color: var(--text);
 }
 
 .main {
@@ -158,7 +216,7 @@ input {
   height: 220px;
   right: -20px;
   top: 34px;
-  background: rgba(255, 90, 45, 0.14);
+  background: rgba(122, 146, 255, 0.12);
 }
 
 .ambientTwo {
@@ -262,7 +320,7 @@ input {
 }
 
 .panelHeader a {
-  color: var(--accent);
+  color: var(--accent-strong);
 }
 
 .stack {
@@ -281,8 +339,8 @@ input {
 
 .cardLink:hover {
   transform: translateY(-2px);
-  border-color: rgba(255, 90, 45, 0.34);
-  background: rgba(255, 90, 45, 0.07);
+  border-color: rgba(151, 176, 255, 0.24);
+  background: rgba(151, 176, 255, 0.05);
 }
 
 .heroVisual {
@@ -348,7 +406,7 @@ input {
 }
 
 .metaLabel {
-  color: var(--muted);
+  color: #c9d5fb;
   font-size: 0.76rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -451,7 +509,7 @@ input {
 
 .pill--high {
   color: #fff4ee;
-  background: rgba(255, 90, 45, 0.74);
+  background: rgba(121, 128, 255, 0.68);
 }
 
 .recordTable {
@@ -497,9 +555,9 @@ input {
 
 .searchButton,
 .pagerLink {
-  border: 1px solid rgba(255, 90, 45, 0.34);
+  border: 1px solid rgba(151, 176, 255, 0.22);
   color: var(--text);
-  background: linear-gradient(180deg, rgba(255, 90, 45, 0.18), rgba(255, 90, 45, 0.08));
+  background: linear-gradient(180deg, rgba(151, 176, 255, 0.16), rgba(151, 176, 255, 0.05));
   border-radius: 14px;
   padding: 12px 15px;
   white-space: nowrap;
@@ -509,7 +567,7 @@ input {
 .searchButton:hover,
 .pagerLink:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(255, 90, 45, 0.18);
+  box-shadow: 0 10px 24px rgba(122, 146, 255, 0.16);
 }
 
 .recordTable th,
@@ -564,7 +622,7 @@ input {
 }
 
 .backLink a {
-  color: var(--accent);
+  color: var(--accent-strong);
 }
 
 .copy {
@@ -602,8 +660,9 @@ input {
   }
 
   .topbar {
-    grid-template-columns: 1fr;
-    align-items: start;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 10px 14px 11px;
   }
 
@@ -611,11 +670,12 @@ input {
     padding: 18px 16px 28px;
   }
 
-  .nav {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 2px;
+  .navDesktop {
+    display: none;
+  }
+
+  .mobileMenu {
+    display: block;
   }
 
   .searchRow,
@@ -666,20 +726,17 @@ input {
   }
 
   .brandLine {
-    gap: 8px;
+    gap: 0;
   }
 
   .wordmark {
-    height: 18px;
-  }
-
-  .brand {
-    font-size: 1.45rem;
+    width: 136px;
   }
 
   .brandSub {
     font-size: 0.78rem;
     line-height: 1.45;
+    max-width: 260px;
   }
 
   .heroVisual {

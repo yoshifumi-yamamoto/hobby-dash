@@ -14,25 +14,33 @@ export function LayoutShell({ title, description, children }: LayoutShellProps) 
       <header className="topbar">
         <div className="brandBlock">
           <div className="brandLine">
-            <Image
-              alt="YAMA LAB"
-              className="wordmark"
-              height={28}
-              priority
-              src="/yama-lab-logo.svg"
-              width={140}
-            />
-            <p className="brandTag">Feel Your Stats</p>
-            <Link className="brand" href="/">
-              hobby-dash
+            <Link className="wordmarkLink" href="/">
+              <img
+                alt="YAMA LAB"
+                className="wordmark"
+                height="30"
+                src="/yama-lab-logo.svg"
+                width="188"
+              />
             </Link>
           </div>
           <p className="brandSub">FEELCYCLE を中心に、継続と振り返りのための個人ダッシュボード。</p>
         </div>
-        <nav className="nav">
+        <nav className="nav navDesktop">
           <Link href="/">Overview</Link>
           <Link href="/records">Records</Link>
         </nav>
+        <details className="mobileMenu">
+          <summary className="mobileMenuButton" aria-label="Open menu">
+            <span />
+            <span />
+            <span />
+          </summary>
+          <nav className="mobileMenuPanel">
+            <Link href="/">Overview</Link>
+            <Link href="/records">Records</Link>
+          </nav>
+        </details>
       </header>
 
       <main className="main">
