@@ -371,6 +371,69 @@ input {
   gap: 12px;
 }
 
+.piePanel {
+  grid-column: span 1;
+}
+
+.pieLayout {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+}
+
+.pieChartWrap {
+  display: grid;
+  place-items: center;
+}
+
+.pieChart {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  overflow: visible;
+}
+
+.pieCenterValue,
+.pieCenterLabel {
+  text-anchor: middle;
+  font-family: var(--font-display), Impact, sans-serif;
+}
+
+.pieCenterValue {
+  fill: var(--text);
+  font-size: 1.4rem;
+}
+
+.pieCenterLabel {
+  fill: var(--muted);
+  font-size: 0.74rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.pieLegend {
+  gap: 10px;
+}
+
+.pieLegendRow {
+  gap: 14px;
+}
+
+.pieLegendLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pieSwatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
 .statRow {
   align-items: flex-start;
 }
@@ -874,6 +937,14 @@ input {
   .row {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .pieLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .pieChartWrap {
+    justify-items: flex-start;
   }
 
   .statRow {
