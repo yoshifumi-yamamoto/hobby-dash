@@ -371,6 +371,21 @@ input {
   gap: 12px;
 }
 
+.statRow {
+  align-items: flex-start;
+}
+
+.statRowLabel {
+  min-width: 0;
+  flex: 1;
+}
+
+.statRowCount {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  text-align: right;
+}
+
 .cardLink {
   display: block;
   padding: 16px;
@@ -850,11 +865,25 @@ input {
 
   .searchRow,
   .paginationRow,
-  .row,
   .detailHeader,
   .panelHeader {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .statRow {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .statRowLabel {
+    overflow-wrap: anywhere;
   }
 
   .recordTable,

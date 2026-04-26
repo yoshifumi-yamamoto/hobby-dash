@@ -16,6 +16,8 @@ interface FeelcycleWorkoutRow {
   updated_at: string;
 }
 
+const SUPABASE_PAGE_SIZE = 500;
+
 function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -113,17 +115,29 @@ function dedupeRecords(records: HobbyRecord[]): HobbyRecord[] {
 
 export async function getAllRecords(): Promise<HobbyRecord[]> {
   const client = getSupabaseClient();
-  const { data, error } = await client
-    .from("feelcycle_workouts")
-    .select("*")
-    .order("workout_date", { ascending: false })
-    .order("start_time", { ascending: false });
+  const rows: FeelcycleWorkoutRow[] = [];
 
-  if (error) {
-    throw error;
+  for (let from = 0; ; from += SUPABASE_PAGE_SIZE) {
+    const { data, error } = await client
+      .from("feelcycle_workouts")
+      .select("*")
+      .order("workout_date", { ascending: false })
+      .order("start_time", { ascending: false })
+      .range(from, from + SUPABASE_PAGE_SIZE - 1);
+
+    if (error) {
+      throw error;
+    }
+
+    const page = (data ?? []) as FeelcycleWorkoutRow[];
+    rows.push(...page);
+
+    if (page.length < SUPABASE_PAGE_SIZE) {
+      break;
+    }
   }
 
-  return dedupeRecords((data ?? []).map((row) => mapRow(row as FeelcycleWorkoutRow)));
+  return dedupeRecords(rows.map((row) => mapRow(row)));
 }
 
 export async function getRecord(id: string): Promise<HobbyRecord | undefined> {

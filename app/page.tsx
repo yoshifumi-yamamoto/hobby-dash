@@ -4,6 +4,7 @@ import Link from "next/link";
 import { LayoutShell } from "@/components/layout-shell";
 import { StatBlock } from "@/components/stat-block";
 import {
+  getAllRecords,
   getCurrentStreakText,
   getGroupedStats,
   getMonthlyStats,
@@ -14,6 +15,7 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  const allRecords = await getAllRecords();
   const monthly = await getMonthlyStats();
   const recent = await getRecentRecords(3);
   const studios = (await getGroupedStats("studio")).slice(0, 3);
@@ -65,7 +67,7 @@ export default async function HomePage() {
           <div className="heroVisualMeta">
             <div>
               <span className="metaLabel">Total records</span>
-              <strong>575</strong>
+              <strong>{allRecords.length}</strong>
             </div>
             <div>
               <span className="metaLabel">Current streak</span>

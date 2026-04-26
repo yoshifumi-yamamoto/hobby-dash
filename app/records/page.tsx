@@ -119,9 +119,9 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
             </div>
             <div className="stack">
               {visibleStudioStats.map((item) => (
-                <div className="row" key={item.label}>
-                  <span>{item.label}</span>
-                  <strong>{item.count}回</strong>
+                <div className="row statRow" key={item.label}>
+                  <span className="statRowLabel">{item.label}</span>
+                  <strong className="statRowCount">{item.count}回</strong>
                 </div>
               ))}
             </div>
@@ -141,9 +141,9 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
             </div>
             <div className="stack">
               {visibleInstructorStats.map((item) => (
-                <div className="row" key={item.label}>
-                  <span>{item.label || "未取得"}</span>
-                  <strong>{item.count}回</strong>
+                <div className="row statRow" key={item.label}>
+                  <span className="statRowLabel">{item.label || "未取得"}</span>
+                  <strong className="statRowCount">{item.count}回</strong>
                 </div>
               ))}
             </div>
@@ -156,9 +156,9 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
             </div>
             <div className="stack">
               {paginatedProgramStats.map((item) => (
-                <div className="row" key={item.label}>
-                  <span>{item.label}</span>
-                  <strong>{item.count}回</strong>
+                <div className="row statRow" key={item.label}>
+                  <span className="statRowLabel">{item.label}</span>
+                  <strong className="statRowCount">{item.count}回</strong>
                 </div>
               ))}
             </div>
