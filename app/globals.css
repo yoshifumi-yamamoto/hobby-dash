@@ -319,6 +319,11 @@ input {
   grid-template-columns: repeat(3, minmax(320px, 1fr));
 }
 
+.recordsSummaryGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+
 .panel {
   position: relative;
   background: linear-gradient(180deg, rgba(20, 20, 21, 0.96) 0%, rgba(12, 12, 13, 0.94) 100%);
@@ -443,6 +448,7 @@ input {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
 .pieSwatch {
@@ -533,6 +539,7 @@ input {
   flex: 0 0 auto;
   white-space: nowrap;
   text-align: right;
+  font-size: 0.96rem;
 }
 
 .cardLink {
@@ -981,10 +988,6 @@ input {
     grid-column: auto;
   }
 
-  .threeCol {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .pieLayout {
     grid-template-columns: 1fr;
   }
@@ -1004,6 +1007,7 @@ input {
   .statsGrid,
   .twoCol,
   .threeCol,
+  .recordsSummaryGrid,
   .detailGrid,
   .listMeta {
     grid-template-columns: 1fr;

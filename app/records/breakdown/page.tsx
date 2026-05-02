@@ -90,7 +90,7 @@ export default async function BreakdownPage({ searchParams }: BreakdownPageProps
           </p>
         </div>
 
-        <div className="grid threeCol">
+        <div className="grid recordsSummaryGrid">
           <PieCard
             centerLabel="札幌優勢"
             centerValue={`${Math.round(((studioPieStats[0]?.count ?? 0) / Math.max(records.length, 1)) * 100)}%`}

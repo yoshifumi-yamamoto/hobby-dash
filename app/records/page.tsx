@@ -82,7 +82,7 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
           </div>
         </form>
 
-        <div className="grid threeCol">
+        <div className="grid recordsSummaryGrid">
           <PieCard
             centerLabel="札幌優勢"
             centerValue={`${Math.round(((studioPieStats[0]?.count ?? 0) / Math.max(filteredRecords.length, 1)) * 100)}%`}
