@@ -316,7 +316,7 @@ input {
 }
 
 .threeCol {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(320px, 1fr));
 }
 
 .panel {
@@ -457,6 +457,12 @@ input {
   padding: 26px;
 }
 
+.panelHeaderMeta {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+}
+
 .rankStack {
   gap: 14px;
 }
@@ -497,6 +503,21 @@ input {
   border-radius: 999px;
   background: linear-gradient(90deg, #c6d6ff 0%, #6f86f6 100%);
   box-shadow: 0 0 18px rgba(111, 134, 246, 0.28);
+}
+
+.breakdownPanel {
+  padding: 24px;
+}
+
+.breakdownTable {
+  gap: 10px;
+}
+
+.breakdownRow {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .statRow {
@@ -959,6 +980,23 @@ input {
   .widePanel {
     grid-column: auto;
   }
+
+  .threeCol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pieLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .pieChartWrap {
+    justify-items: flex-start;
+  }
+
+  .rankMeta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 @media (max-width: 800px) {
@@ -997,6 +1035,10 @@ input {
   .panelHeader {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .panelHeaderMeta {
+    justify-items: start;
   }
 
   .row {

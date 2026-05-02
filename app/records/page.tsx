@@ -1,262 +1,50 @@
 import { LayoutShell } from "@/components/layout-shell";
-import { RecordList } from "@/components/record-list";
-import { buildGroupStats, filterRecords, getAllRecords } from "@/lib/records";
-import type { GroupStat, HobbyRecord } from "@/types/record";
+import { InstructorBarCard, PieCard, getProgramPieColors, getStudioPieColors, getThemePieColors } from "@/components/records-summary";
+import { filterRecords, getAllRecords } from "@/lib/records";
+import { buildProgramSeriesStats, buildStandardVariantStats, buildTopInstructorStats, collapseMinorStats } from "@/lib/record-breakdown";
 
 export const dynamic = "force-dynamic";
 
 interface RecordsPageProps {
   searchParams?: Promise<{
     q?: string;
-    programPage?: string;
-    monthPage?: string;
-    studioExpanded?: string;
-    instructorExpanded?: string;
   }>;
 }
 
-const PROGRAMS_PER_PAGE = 20;
-const DEFAULT_GROUP_PREVIEW_COUNT = 8;
-const PIE_OTHER_THRESHOLD = 0.03;
-const INSTRUCTOR_LIMIT = 8;
-const STUDIO_PIE_COLORS = ["#88a8ff", "#5b6576", "#4a5361", "#3e4652"];
-const PROGRAM_PIE_COLORS = ["#f2f6ff", "#c2d1ff", "#8fa8ff", "#6b83eb", "#5164be", "#465063", "#3a4350", "#2f3742"];
-const THEME_PIE_COLORS = ["#b8cbff", "#8ea8ff", "#7087ee", "#596ace", "#d4b36e", "#8abcae", "#6d7788", "#596170"];
-
-function buildOrderedStats(counts: Map<string, number>, order?: string[]): GroupStat[] {
-  if (!order) {
-    return [...counts.entries()]
-      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-      .map(([label, count]) => ({ label, count }));
-  }
-
-  const ordered = order
-    .map((label) => ({ label, count: counts.get(label) ?? 0 }))
-    .filter((item) => item.count > 0);
-  const extras = [...counts.entries()]
-    .filter(([label]) => !order.includes(label))
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .map(([label, count]) => ({ label, count }));
-
-  return [...ordered, ...extras];
-}
-
-function buildProgramSeriesStats(records: HobbyRecord[]): GroupStat[] {
-  const counts = new Map<string, number>();
-  for (const record of records) {
-    const label = record.programSeries || "未分類";
-    counts.set(label, (counts.get(label) ?? 0) + 1);
-  }
-
-  return buildOrderedStats(counts, ["BB1", "BB2", "BB3", "BSB", "BSW", "BSL", "BSBi", "BSWi"]);
-}
-
-function buildStandardVariantStats(records: HobbyRecord[]): GroupStat[] {
-  const counts = new Map<string, number>();
-  for (const record of records) {
-    if (record.programFamily !== "standard") {
-      continue;
-    }
-
-    const label = record.programVariant || "未分類";
-    counts.set(label, (counts.get(label) ?? 0) + 1);
-  }
-
-  return buildOrderedStats(counts);
-}
-
-function collapseMinorStats(stats: GroupStat[], total: number): GroupStat[] {
-  if (total === 0) {
-    return [];
-  }
-
-  const major = stats.filter((item) => item.count / total >= PIE_OTHER_THRESHOLD);
-  const minorTotal = stats
-    .filter((item) => item.count / total < PIE_OTHER_THRESHOLD)
-    .reduce((sum, item) => sum + item.count, 0);
-
-  if (minorTotal > 0) {
-    major.push({ label: "その他", count: minorTotal });
-  }
-
-  return major.sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
-}
-
-function buildTopInstructorStats(stats: GroupStat[]): GroupStat[] {
-  const top = stats.slice(0, INSTRUCTOR_LIMIT);
-  const remaining = stats.slice(INSTRUCTOR_LIMIT).reduce((sum, item) => sum + item.count, 0);
-
-  if (remaining > 0) {
-    top.push({ label: "その他", count: remaining });
-  }
-
-  return top;
-}
-
-function polarToCartesian(cx: number, cy: number, radius: number, angleInDegrees: number) {
-  const angleInRadians = (angleInDegrees - 90) * Math.PI / 180;
-  return {
-    x: cx + radius * Math.cos(angleInRadians),
-    y: cy + radius * Math.sin(angleInRadians)
-  };
-}
-
-function describeArc(cx: number, cy: number, radius: number, startAngle: number, endAngle: number): string {
-  const start = polarToCartesian(cx, cy, radius, endAngle);
-  const end = polarToCartesian(cx, cy, radius, startAngle);
-  const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
-  return [`M ${cx} ${cy}`, `L ${start.x} ${start.y}`, `A ${radius} ${radius} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`, "Z"].join(" ");
-}
-
-function PieCard(
-  {
-    title,
-    stats,
-    colors,
-    centerLabel,
-    centerValue,
-    summary
-  }: {
-    title: string;
-    stats: GroupStat[];
-    colors: string[];
-    centerLabel: string;
-    centerValue: string;
-    summary?: string;
-  }
-) {
-  const total = stats.reduce((sum, item) => sum + item.count, 0);
-  let startAngle = 0;
-
-  return (
-    <article className="panel piePanel">
-      <div className="panelHeader">
-        <div>
-          <h2>{title}</h2>
-          {summary ? <p className="muted chartSummary">{summary}</p> : null}
-        </div>
-        <strong className="chartTotal">{total}件</strong>
-      </div>
-      <div className="pieLayout">
-        <div className="pieChartWrap">
-          <svg className="pieChart" viewBox="0 0 220 220" aria-label={title} role="img">
-            {stats.map((item, index) => {
-              const angle = total === 0 ? 0 : (item.count / total) * 360;
-              const path = describeArc(110, 110, 88, startAngle, startAngle + angle);
-              startAngle += angle;
-
-              return (
-                <path
-                  key={item.label}
-                  d={path}
-                  fill={colors[index % colors.length]}
-                  stroke="rgba(10, 10, 11, 0.92)"
-                  strokeWidth="2"
-                />
-              );
-            })}
-            <circle cx="110" cy="110" fill="rgba(10, 10, 11, 0.94)" r="52" />
-            <text className="pieCenterValue" x="110" y="102">{centerValue}</text>
-            <text className="pieCenterLabel" x="110" y="123">{centerLabel}</text>
-          </svg>
-        </div>
-        <div className="stack pieLegend">
-          {stats.map((item, index) => {
-            const percentage = total === 0 ? 0 : (item.count / total) * 100;
-            return (
-              <div className="row statRow pieLegendRow" key={item.label}>
-                <span className="statRowLabel pieLegendLabel">
-                  <span
-                    className="pieSwatch"
-                    style={{ backgroundColor: colors[index % colors.length] }}
-                  />
-                  {item.label}
-                </span>
-                <strong className="statRowCount">{item.count}回 {percentage.toFixed(1)}%</strong>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function InstructorBarCard({ title, stats }: { title: string; stats: GroupStat[] }) {
-  const total = stats.reduce((sum, item) => sum + item.count, 0);
-  const max = Math.max(...stats.map((item) => item.count), 1);
-
-  return (
-    <article className="panel chartPanelRank">
-      <div className="panelHeader">
-        <div>
-          <h2>{title}</h2>
-          <p className="muted chartSummary">上位{INSTRUCTOR_LIMIT}名を表示し、残りはその他にまとめています。</p>
-        </div>
-        <strong className="chartTotal">{total}件</strong>
-      </div>
-      <div className="stack rankStack">
-        {stats.map((item, index) => {
-          const percentage = total === 0 ? 0 : (item.count / total) * 100;
-          return (
-            <div className="rankRow" key={item.label}>
-              <div className="rankMeta">
-                <span className="rankName">{index + 1}. {item.label || "未取得"}</span>
-                <strong className="rankValue">{item.count}回 {percentage.toFixed(1)}%</strong>
-              </div>
-              <div className="rankBarTrack">
-                <div className="rankBarFill" style={{ width: `${(item.count / max) * 100}%` }} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </article>
-  );
-}
-
-function buildPageHref(
-  query: string,
-  programPage: number,
-  monthPage: number,
-  studioExpanded: boolean,
-  instructorExpanded: boolean
-): string {
+function buildBreakdownHref(query: string, section?: string): string {
   const params = new URLSearchParams();
   if (query) {
     params.set("q", query);
   }
-  if (programPage > 1) {
-    params.set("programPage", String(programPage));
+  if (section) {
+    params.set("section", section);
   }
-  if (monthPage > 1) {
-    params.set("monthPage", String(monthPage));
-  }
-  if (studioExpanded) {
-    params.set("studioExpanded", "1");
-  }
-  if (instructorExpanded) {
-    params.set("instructorExpanded", "1");
-  }
-
   const search = params.toString();
-  return search ? `/records?${search}` : "/records";
+  return search ? `/records/breakdown?${search}` : "/records/breakdown";
 }
 
 export default async function RecordsPage({ searchParams }: RecordsPageProps) {
   const params = (await searchParams) ?? {};
   const query = params.q?.trim() ?? "";
-  const programPage = Math.max(Number.parseInt(params.programPage ?? "1", 10) || 1, 1);
-  const monthPage = Math.max(Number.parseInt(params.monthPage ?? "1", 10) || 1, 1);
-  const studioExpanded = params.studioExpanded === "1";
-  const instructorExpanded = params.instructorExpanded === "1";
   const records = await getAllRecords();
   const filteredRecords = filterRecords(records, query);
-  const studioStats = buildGroupStats(filteredRecords, "studio");
+
+  const studioCounts = new Map<string, number>();
+  const instructorCounts = new Map<string, number>();
+  for (const record of filteredRecords) {
+    studioCounts.set(record.studio, (studioCounts.get(record.studio) ?? 0) + 1);
+    instructorCounts.set(record.instructorName || "未取得", (instructorCounts.get(record.instructorName || "未取得") ?? 0) + 1);
+  }
+
+  const studioStats = [...studioCounts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([label, count]) => ({ label, count }));
+  const instructorStats = [...instructorCounts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([label, count]) => ({ label, count }));
+
   const programSeriesStats = buildProgramSeriesStats(filteredRecords);
   const standardVariantStats = buildStandardVariantStats(filteredRecords);
-  const programStats = buildGroupStats(filteredRecords, "program");
-  const instructorStats = buildGroupStats(filteredRecords, "instructorName");
   const instructorBarStats = buildTopInstructorStats(instructorStats);
   const studioPieStats = collapseMinorStats(studioStats, filteredRecords.length);
   const programSeriesPieStats = collapseMinorStats(programSeriesStats, filteredRecords.length);
@@ -264,35 +52,18 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
     standardVariantStats,
     standardVariantStats.reduce((sum, item) => sum + item.count, 0)
   );
-  const visibleStudioStats = studioExpanded ? studioStats : studioStats.slice(0, DEFAULT_GROUP_PREVIEW_COUNT);
-  const visibleInstructorStats = instructorExpanded
-    ? instructorStats
-    : instructorStats.slice(0, DEFAULT_GROUP_PREVIEW_COUNT);
-  const availableMonths = [...new Set(filteredRecords.map((record) => record.date.slice(0, 7)))];
-  const totalProgramPages = Math.max(Math.ceil(programStats.length / PROGRAMS_PER_PAGE), 1);
-  const currentProgramPage = Math.min(programPage, totalProgramPages);
-  const totalMonthPages = Math.max(availableMonths.length, 1);
-  const currentMonthPage = Math.min(monthPage, totalMonthPages);
-  const selectedMonth = availableMonths[currentMonthPage - 1] ?? "";
-  const paginatedProgramStats = programStats.slice(
-    (currentProgramPage - 1) * PROGRAMS_PER_PAGE,
-    currentProgramPage * PROGRAMS_PER_PAGE
-  );
-  const monthScopedRecords = selectedMonth
-    ? filteredRecords.filter((record) => record.date.startsWith(selectedMonth))
-    : filteredRecords;
 
   return (
     <LayoutShell
       title="Records"
-      description="日付、店舗、プログラム、メモで検索しながら、一覧と集計をまとめて見るページです。細かい比較もここで完結させます。"
+      description="集計の傾向を最初に見て、必要なときだけ詳細ページへ掘り下げるためのサマリーページです。"
     >
       <section className="grid">
         <div className="listMeta panel">
           <strong>{filteredRecords.length}件の記録</strong>
           <p className="muted">
             {query ? `「${query}」で絞り込み中。` : ""}
-            主観メモを含めて、あとから振り返りやすい並びにしています。
+            この画面は傾向把握を優先し、細かい内訳は別ページで確認できる構成にしています。
           </p>
         </div>
 
@@ -315,7 +86,8 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
           <PieCard
             centerLabel="札幌優勢"
             centerValue={`${Math.round(((studioPieStats[0]?.count ?? 0) / Math.max(filteredRecords.length, 1)) * 100)}%`}
-            colors={STUDIO_PIE_COLORS}
+            colors={getStudioPieColors()}
+            detailHref={buildBreakdownHref(query, "studio")}
             stats={studioPieStats}
             summary="札幌を基準に、他店舗の広がりだけがすぐ分かる配色にしています。"
             title="店舗の割合"
@@ -323,127 +95,23 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
           <PieCard
             centerLabel="最多カテゴリ"
             centerValue={programSeriesPieStats[0] ? `${programSeriesPieStats[0].label} ${((programSeriesPieStats[0].count / Math.max(filteredRecords.length, 1)) * 100).toFixed(0)}%` : "-"}
-            colors={PROGRAM_PIE_COLORS}
+            colors={getProgramPieColors()}
+            detailHref={buildBreakdownHref(query, "program")}
             stats={programSeriesPieStats}
             summary="BB系・BS系の大枠を見て、どのシリーズに偏っているかを一瞬で把握します。"
             title="プログラム別"
           />
-          <InstructorBarCard stats={instructorBarStats} title="インストラクター別" />
+          <InstructorBarCard detailHref={buildBreakdownHref(query, "instructor")} stats={instructorBarStats} title="インストラクター別" />
           <PieCard
             centerLabel="最多テーマ"
             centerValue={standardVariantPieStats[0] ? `${standardVariantPieStats[0].label} ${((standardVariantPieStats[0].count / Math.max(standardVariantStats.reduce((sum, item) => sum + item.count, 0), 1)) * 100).toFixed(0)}%` : "-"}
-            colors={THEME_PIE_COLORS}
+            colors={getThemePieColors()}
+            detailHref={buildBreakdownHref(query, "theme")}
             stats={standardVariantPieStats}
             summary="通常プログラムだけを対象に、テーマやジャンルの偏りを比較しやすくしています。"
             title="テーマ・ジャンル別"
           />
-
-          <article className="panel">
-            <div className="panelHeader">
-              <h2>店舗ごとの回数</h2>
-              {studioStats.length > DEFAULT_GROUP_PREVIEW_COUNT ? (
-                <a
-                  className="textToggle"
-                  href={buildPageHref(query, currentProgramPage, currentMonthPage, !studioExpanded, instructorExpanded)}
-                >
-                  {studioExpanded ? "閉じる" : "もっと見る"}
-                </a>
-              ) : null}
-            </div>
-            <div className="stack">
-              {visibleStudioStats.map((item) => (
-                <div className="row statRow" key={item.label}>
-                  <span className="statRowLabel">{item.label}</span>
-                  <strong className="statRowCount">{item.count}回</strong>
-                </div>
-              ))}
-            </div>
-          </article>
-
-          <article className="panel">
-            <div className="panelHeader">
-              <h2>インストラクター別の回数</h2>
-              {instructorStats.length > DEFAULT_GROUP_PREVIEW_COUNT ? (
-                <a
-                  className="textToggle"
-                  href={buildPageHref(query, currentProgramPage, currentMonthPage, studioExpanded, !instructorExpanded)}
-                >
-                  {instructorExpanded ? "閉じる" : "もっと見る"}
-                </a>
-              ) : null}
-            </div>
-            <div className="stack">
-              {visibleInstructorStats.map((item) => (
-                <div className="row statRow" key={item.label}>
-                  <span className="statRowLabel">{item.label || "未取得"}</span>
-                  <strong className="statRowCount">{item.count}回</strong>
-                </div>
-              ))}
-            </div>
-          </article>
-
-          <article className="panel">
-            <div className="panelHeader">
-              <h2>プログラム全体の回数</h2>
-              <span className="muted">{currentProgramPage} / {totalProgramPages}</span>
-            </div>
-            <div className="stack">
-              {paginatedProgramStats.map((item) => (
-                <div className="row statRow" key={item.label}>
-                  <span className="statRowLabel">{item.label}</span>
-                  <strong className="statRowCount">{item.count}回</strong>
-                </div>
-              ))}
-            </div>
-            <div className="paginationRow">
-              {currentProgramPage > 1 ? (
-                <a
-                  className="pagerLink"
-                  href={buildPageHref(query, currentProgramPage - 1, currentMonthPage, studioExpanded, instructorExpanded)}
-                >
-                  ← 前へ
-                </a>
-              ) : <span className="pagerSpacer" />}
-              <span className="muted">{currentProgramPage} / {totalProgramPages}</span>
-              {currentProgramPage < totalProgramPages ? (
-                <a
-                  className="pagerLink"
-                  href={buildPageHref(query, currentProgramPage + 1, currentMonthPage, studioExpanded, instructorExpanded)}
-                >
-                  次へ →
-                </a>
-              ) : <span className="pagerSpacer" />}
-            </div>
-          </article>
         </div>
-
-        <article className="panel listSectionPanel">
-          <div className="panelHeader">
-            <h2>記録一覧</h2>
-            <span className="muted">
-              {selectedMonth || "全期間"} / {currentMonthPage} / {totalMonthPages}
-            </span>
-          </div>
-          <div className="paginationRow monthPager">
-            {currentMonthPage > 1 ? (
-              <a
-                className="pagerLink"
-                href={buildPageHref(query, currentProgramPage, currentMonthPage - 1, studioExpanded, instructorExpanded)}
-              >
-                ← 前月の一覧
-              </a>
-            ) : <span className="pagerSpacer" />}
-            {currentMonthPage < totalMonthPages ? (
-              <a
-                className="pagerLink"
-                href={buildPageHref(query, currentProgramPage, currentMonthPage + 1, studioExpanded, instructorExpanded)}
-              >
-                次月の一覧 →
-              </a>
-            ) : <span className="pagerSpacer" />}
-          </div>
-          <RecordList framed={false} records={monthScopedRecords} />
-        </article>
       </section>
     </LayoutShell>
   );
