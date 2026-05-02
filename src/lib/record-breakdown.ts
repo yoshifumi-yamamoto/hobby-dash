@@ -2,6 +2,7 @@ import type { GroupStat, HobbyRecord } from "@/types/record";
 
 export const PIE_OTHER_THRESHOLD = 0.03;
 export const INSTRUCTOR_LIMIT = 8;
+export const THEME_PIE_LIMIT = 7;
 
 export function buildOrderedStats(counts: Map<string, number>, order?: string[]): GroupStat[] {
   if (!order) {
@@ -71,4 +72,15 @@ export function buildTopInstructorStats(stats: GroupStat[]): GroupStat[] {
   }
 
   return top;
+}
+
+export function collapseAfterLimit(stats: GroupStat[], limit: number): GroupStat[] {
+  const visible = stats.slice(0, limit);
+  const remaining = stats.slice(limit).reduce((sum, item) => sum + item.count, 0);
+
+  if (remaining > 0) {
+    visible.push({ label: "その他", count: remaining });
+  }
+
+  return visible;
 }

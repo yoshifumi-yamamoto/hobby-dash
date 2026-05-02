@@ -1,7 +1,7 @@
 import { LayoutShell } from "@/components/layout-shell";
 import { InstructorBarCard, PieCard, getProgramPieColors, getStudioPieColors, getThemePieColors } from "@/components/records-summary";
 import { filterRecords, getAllRecords } from "@/lib/records";
-import { buildProgramSeriesStats, buildStandardVariantStats, buildTopInstructorStats, collapseMinorStats } from "@/lib/record-breakdown";
+import { THEME_PIE_LIMIT, buildProgramSeriesStats, buildStandardVariantStats, buildTopInstructorStats, collapseAfterLimit, collapseMinorStats } from "@/lib/record-breakdown";
 
 export const dynamic = "force-dynamic";
 
@@ -48,10 +48,8 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
   const instructorBarStats = buildTopInstructorStats(instructorStats);
   const studioPieStats = collapseMinorStats(studioStats, filteredRecords.length);
   const programSeriesPieStats = collapseMinorStats(programSeriesStats, filteredRecords.length);
-  const standardVariantPieStats = collapseMinorStats(
-    standardVariantStats,
-    standardVariantStats.reduce((sum, item) => sum + item.count, 0)
-  );
+  const standardVariantPieStats = collapseAfterLimit(standardVariantStats, THEME_PIE_LIMIT);
+  const leadingTheme = standardVariantStats.find((item) => item.label !== "その他") ?? standardVariantPieStats[0];
 
   return (
     <LayoutShell
@@ -103,7 +101,7 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
           />
           <PieCard
             centerLabel="最多テーマ"
-            centerValue={standardVariantPieStats[0] ? `${standardVariantPieStats[0].label} ${((standardVariantPieStats[0].count / Math.max(standardVariantStats.reduce((sum, item) => sum + item.count, 0), 1)) * 100).toFixed(0)}%` : "-"}
+            centerValue={leadingTheme ? `${leadingTheme.label} ${((leadingTheme.count / Math.max(standardVariantStats.reduce((sum, item) => sum + item.count, 0), 1)) * 100).toFixed(0)}%` : "-"}
             colors={getThemePieColors()}
             detailHref={buildBreakdownHref(query, "theme")}
             stats={standardVariantPieStats}

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { LayoutShell } from "@/components/layout-shell";
 import { InstructorBarCard, PieCard, getProgramPieColors, getStudioPieColors, getThemePieColors } from "@/components/records-summary";
 import { filterRecords, getAllRecords } from "@/lib/records";
-import { buildProgramSeriesStats, buildStandardVariantStats, buildTopInstructorStats, collapseMinorStats } from "@/lib/record-breakdown";
+import { THEME_PIE_LIMIT, buildProgramSeriesStats, buildStandardVariantStats, buildTopInstructorStats, collapseAfterLimit, collapseMinorStats } from "@/lib/record-breakdown";
 import type { GroupStat } from "@/types/record";
 
 export const dynamic = "force-dynamic";
@@ -70,11 +70,9 @@ export default async function BreakdownPage({ searchParams }: BreakdownPageProps
   const { studioStats, programSeriesStats, standardVariantStats, instructorStats } = buildStats(records);
   const studioPieStats = collapseMinorStats(studioStats, records.length);
   const programSeriesPieStats = collapseMinorStats(programSeriesStats, records.length);
-  const standardVariantPieStats = collapseMinorStats(
-    standardVariantStats,
-    standardVariantStats.reduce((sum, item) => sum + item.count, 0)
-  );
+  const standardVariantPieStats = collapseAfterLimit(standardVariantStats, THEME_PIE_LIMIT);
   const instructorBarStats = buildTopInstructorStats(instructorStats);
+  const leadingTheme = standardVariantStats.find((item) => item.label !== "その他") ?? standardVariantPieStats[0];
 
   return (
     <LayoutShell
@@ -109,7 +107,7 @@ export default async function BreakdownPage({ searchParams }: BreakdownPageProps
           />
           <PieCard
             centerLabel="最多テーマ"
-            centerValue={standardVariantPieStats[0] ? `${standardVariantPieStats[0].label} ${((standardVariantPieStats[0].count / Math.max(standardVariantStats.reduce((sum, item) => sum + item.count, 0), 1)) * 100).toFixed(0)}%` : "-"}
+            centerValue={leadingTheme ? `${leadingTheme.label} ${((leadingTheme.count / Math.max(standardVariantStats.reduce((sum, item) => sum + item.count, 0), 1)) * 100).toFixed(0)}%` : "-"}
             colors={getThemePieColors()}
             stats={standardVariantPieStats}
             summary="テーマやジャンルもプログラム別と同じドーナツ表現で揃えています。"
