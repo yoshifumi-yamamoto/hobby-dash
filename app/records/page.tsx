@@ -101,7 +101,6 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
             summary="BB系・BS系の大枠を見て、どのシリーズに偏っているかを一瞬で把握します。"
             title="プログラム別"
           />
-          <InstructorBarCard detailHref={buildBreakdownHref(query, "instructor")} stats={instructorBarStats} title="インストラクター別" />
           <PieCard
             centerLabel="最多テーマ"
             centerValue={standardVariantPieStats[0] ? `${standardVariantPieStats[0].label} ${((standardVariantPieStats[0].count / Math.max(standardVariantStats.reduce((sum, item) => sum + item.count, 0), 1)) * 100).toFixed(0)}%` : "-"}
@@ -111,6 +110,7 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
             summary="通常プログラムだけを対象に、テーマやジャンルの偏りを比較しやすくしています。"
             title="テーマ・ジャンル別"
           />
+          <InstructorBarCard detailHref={buildBreakdownHref(query, "instructor")} stats={instructorBarStats} title="インストラクター別" />
         </div>
       </section>
     </LayoutShell>

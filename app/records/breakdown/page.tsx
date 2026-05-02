@@ -107,7 +107,6 @@ export default async function BreakdownPage({ searchParams }: BreakdownPageProps
             summary="BB系・BS系の比率を一覧の前に視覚で把握できます。"
             title="プログラム別"
           />
-          <InstructorBarCard stats={instructorBarStats} title="インストラクター別" />
           <PieCard
             centerLabel="最多テーマ"
             centerValue={standardVariantPieStats[0] ? `${standardVariantPieStats[0].label} ${((standardVariantPieStats[0].count / Math.max(standardVariantStats.reduce((sum, item) => sum + item.count, 0), 1)) * 100).toFixed(0)}%` : "-"}
@@ -116,6 +115,7 @@ export default async function BreakdownPage({ searchParams }: BreakdownPageProps
             summary="テーマやジャンルもプログラム別と同じドーナツ表現で揃えています。"
             title="テーマ・ジャンル別"
           />
+          <InstructorBarCard stats={instructorBarStats} title="インストラクター別" />
         </div>
 
         <div className="grid twoCol">
