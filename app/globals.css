@@ -373,13 +373,14 @@ input {
 
 .piePanel {
   grid-column: span 1;
+  padding: 26px;
 }
 
 .pieLayout {
   display: grid;
   grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
-  gap: 18px;
-  align-items: center;
+  gap: 22px;
+  align-items: start;
 }
 
 .pieChartWrap {
@@ -392,6 +393,7 @@ input {
   max-width: 220px;
   height: auto;
   overflow: visible;
+  filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.22));
 }
 
 .pieCenterValue,
@@ -402,22 +404,39 @@ input {
 
 .pieCenterValue {
   fill: var(--text);
-  font-size: 1.4rem;
+  font-size: 1.05rem;
 }
 
 .pieCenterLabel {
   fill: var(--muted);
-  font-size: 0.74rem;
+  font-size: 0.65rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
+.chartSummary {
+  margin: 6px 0 0;
+  max-width: 22rem;
+  line-height: 1.6;
+}
+
+.chartTotal {
+  font-family: var(--font-display), Impact, sans-serif;
+  font-size: 1.2rem;
+  color: var(--text);
+}
+
 .pieLegend {
-  gap: 10px;
+  gap: 12px;
 }
 
 .pieLegendRow {
-  gap: 14px;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .pieLegendLabel {
@@ -427,11 +446,57 @@ input {
 }
 
 .pieSwatch {
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
   border-radius: 999px;
   flex: 0 0 auto;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.chartPanelRank {
+  padding: 26px;
+}
+
+.rankStack {
+  gap: 14px;
+}
+
+.rankRow {
+  display: grid;
+  gap: 8px;
+}
+
+.rankMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: baseline;
+}
+
+.rankName {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.rankValue {
+  white-space: nowrap;
+  font-family: var(--font-display), Impact, sans-serif;
+  font-size: 1rem;
+}
+
+.rankBarTrack {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.rankBarFill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #c6d6ff 0%, #6f86f6 100%);
+  box-shadow: 0 0 18px rgba(111, 134, 246, 0.28);
 }
 
 .statRow {
@@ -945,6 +1010,11 @@ input {
 
   .pieChartWrap {
     justify-items: flex-start;
+  }
+
+  .rankMeta {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .statRow {

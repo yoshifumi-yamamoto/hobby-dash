@@ -18,17 +18,10 @@ interface RecordsPageProps {
 const PROGRAMS_PER_PAGE = 20;
 const DEFAULT_GROUP_PREVIEW_COUNT = 8;
 const PIE_OTHER_THRESHOLD = 0.03;
-const PIE_COLORS = [
-  "#e8efff",
-  "#b6c8ff",
-  "#8ea8ff",
-  "#6f86f6",
-  "#4f63d9",
-  "#d7b56d",
-  "#8ac7b8",
-  "#7c8a9d",
-  "#5a6573"
-];
+const INSTRUCTOR_LIMIT = 8;
+const STUDIO_PIE_COLORS = ["#88a8ff", "#5b6576", "#4a5361", "#3e4652"];
+const PROGRAM_PIE_COLORS = ["#f2f6ff", "#c2d1ff", "#8fa8ff", "#6b83eb", "#5164be", "#465063", "#3a4350", "#2f3742"];
+const THEME_PIE_COLORS = ["#b8cbff", "#8ea8ff", "#7087ee", "#596ace", "#d4b36e", "#8abcae", "#6d7788", "#596170"];
 
 function buildOrderedStats(counts: Map<string, number>, order?: string[]): GroupStat[] {
   if (!order) {
@@ -89,6 +82,17 @@ function collapseMinorStats(stats: GroupStat[], total: number): GroupStat[] {
   return major.sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
 }
 
+function buildTopInstructorStats(stats: GroupStat[]): GroupStat[] {
+  const top = stats.slice(0, INSTRUCTOR_LIMIT);
+  const remaining = stats.slice(INSTRUCTOR_LIMIT).reduce((sum, item) => sum + item.count, 0);
+
+  if (remaining > 0) {
+    top.push({ label: "その他", count: remaining });
+  }
+
+  return top;
+}
+
 function polarToCartesian(cx: number, cy: number, radius: number, angleInDegrees: number) {
   const angleInRadians = (angleInDegrees - 90) * Math.PI / 180;
   return {
@@ -104,15 +108,34 @@ function describeArc(cx: number, cy: number, radius: number, startAngle: number,
   return [`M ${cx} ${cy}`, `L ${start.x} ${start.y}`, `A ${radius} ${radius} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`, "Z"].join(" ");
 }
 
-function PieCard({ title, stats }: { title: string; stats: GroupStat[] }) {
+function PieCard(
+  {
+    title,
+    stats,
+    colors,
+    centerLabel,
+    centerValue,
+    summary
+  }: {
+    title: string;
+    stats: GroupStat[];
+    colors: string[];
+    centerLabel: string;
+    centerValue: string;
+    summary?: string;
+  }
+) {
   const total = stats.reduce((sum, item) => sum + item.count, 0);
   let startAngle = 0;
 
   return (
     <article className="panel piePanel">
       <div className="panelHeader">
-        <h2>{title}</h2>
-        <span className="muted">{total}件</span>
+        <div>
+          <h2>{title}</h2>
+          {summary ? <p className="muted chartSummary">{summary}</p> : null}
+        </div>
+        <strong className="chartTotal">{total}件</strong>
       </div>
       <div className="pieLayout">
         <div className="pieChartWrap">
@@ -126,15 +149,15 @@ function PieCard({ title, stats }: { title: string; stats: GroupStat[] }) {
                 <path
                   key={item.label}
                   d={path}
-                  fill={PIE_COLORS[index % PIE_COLORS.length]}
+                  fill={colors[index % colors.length]}
                   stroke="rgba(10, 10, 11, 0.92)"
                   strokeWidth="2"
                 />
               );
             })}
-            <circle cx="110" cy="110" fill="rgba(10, 10, 11, 0.92)" r="46" />
-            <text className="pieCenterValue" x="110" y="102">{total}</text>
-            <text className="pieCenterLabel" x="110" y="123">records</text>
+            <circle cx="110" cy="110" fill="rgba(10, 10, 11, 0.94)" r="52" />
+            <text className="pieCenterValue" x="110" y="102">{centerValue}</text>
+            <text className="pieCenterLabel" x="110" y="123">{centerLabel}</text>
           </svg>
         </div>
         <div className="stack pieLegend">
@@ -145,15 +168,48 @@ function PieCard({ title, stats }: { title: string; stats: GroupStat[] }) {
                 <span className="statRowLabel pieLegendLabel">
                   <span
                     className="pieSwatch"
-                    style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length] }}
+                    style={{ backgroundColor: colors[index % colors.length] }}
                   />
                   {item.label}
                 </span>
-                <strong className="statRowCount">{item.count}回 ({percentage.toFixed(1)}%)</strong>
+                <strong className="statRowCount">{item.count}回 {percentage.toFixed(1)}%</strong>
               </div>
             );
           })}
         </div>
+      </div>
+    </article>
+  );
+}
+
+function InstructorBarCard({ title, stats }: { title: string; stats: GroupStat[] }) {
+  const total = stats.reduce((sum, item) => sum + item.count, 0);
+  const max = Math.max(...stats.map((item) => item.count), 1);
+
+  return (
+    <article className="panel chartPanelRank">
+      <div className="panelHeader">
+        <div>
+          <h2>{title}</h2>
+          <p className="muted chartSummary">上位{INSTRUCTOR_LIMIT}名を表示し、残りはその他にまとめています。</p>
+        </div>
+        <strong className="chartTotal">{total}件</strong>
+      </div>
+      <div className="stack rankStack">
+        {stats.map((item, index) => {
+          const percentage = total === 0 ? 0 : (item.count / total) * 100;
+          return (
+            <div className="rankRow" key={item.label}>
+              <div className="rankMeta">
+                <span className="rankName">{index + 1}. {item.label || "未取得"}</span>
+                <strong className="rankValue">{item.count}回 {percentage.toFixed(1)}%</strong>
+              </div>
+              <div className="rankBarTrack">
+                <div className="rankBarFill" style={{ width: `${(item.count / max) * 100}%` }} />
+              </div>
+            </div>
+          );
+        })}
       </div>
     </article>
   );
@@ -201,8 +257,8 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
   const standardVariantStats = buildStandardVariantStats(filteredRecords);
   const programStats = buildGroupStats(filteredRecords, "program");
   const instructorStats = buildGroupStats(filteredRecords, "instructorName");
+  const instructorBarStats = buildTopInstructorStats(instructorStats);
   const studioPieStats = collapseMinorStats(studioStats, filteredRecords.length);
-  const instructorPieStats = collapseMinorStats(instructorStats, filteredRecords.length);
   const programSeriesPieStats = collapseMinorStats(programSeriesStats, filteredRecords.length);
   const standardVariantPieStats = collapseMinorStats(
     standardVariantStats,
@@ -256,10 +312,31 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
         </form>
 
         <div className="grid threeCol">
-          <PieCard stats={studioPieStats} title="店舗の割合" />
-          <PieCard stats={instructorPieStats} title="インストラクターの割合" />
-          <PieCard stats={programSeriesPieStats} title="BB系・BS系の割合" />
-          <PieCard stats={standardVariantPieStats} title="通常プログラム分類の割合" />
+          <PieCard
+            centerLabel="札幌優勢"
+            centerValue={`${Math.round(((studioPieStats[0]?.count ?? 0) / Math.max(filteredRecords.length, 1)) * 100)}%`}
+            colors={STUDIO_PIE_COLORS}
+            stats={studioPieStats}
+            summary="札幌を基準に、他店舗の広がりだけがすぐ分かる配色にしています。"
+            title="店舗の割合"
+          />
+          <PieCard
+            centerLabel="最多カテゴリ"
+            centerValue={programSeriesPieStats[0] ? `${programSeriesPieStats[0].label} ${((programSeriesPieStats[0].count / Math.max(filteredRecords.length, 1)) * 100).toFixed(0)}%` : "-"}
+            colors={PROGRAM_PIE_COLORS}
+            stats={programSeriesPieStats}
+            summary="BB系・BS系の大枠を見て、どのシリーズに偏っているかを一瞬で把握します。"
+            title="プログラム別"
+          />
+          <InstructorBarCard stats={instructorBarStats} title="インストラクター別" />
+          <PieCard
+            centerLabel="最多テーマ"
+            centerValue={standardVariantPieStats[0] ? `${standardVariantPieStats[0].label} ${((standardVariantPieStats[0].count / Math.max(standardVariantStats.reduce((sum, item) => sum + item.count, 0), 1)) * 100).toFixed(0)}%` : "-"}
+            colors={THEME_PIE_COLORS}
+            stats={standardVariantPieStats}
+            summary="通常プログラムだけを対象に、テーマやジャンルの偏りを比較しやすくしています。"
+            title="テーマ・ジャンル別"
+          />
 
           <article className="panel">
             <div className="panelHeader">
