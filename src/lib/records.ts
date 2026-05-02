@@ -7,6 +7,13 @@ interface FeelcycleWorkoutRow {
   workout_date: string;
   studio: string;
   program: string;
+  raw_program_name: string | null;
+  lesson_kind: string | null;
+  program_family: string | null;
+  program_series: string | null;
+  program_variant: string | null;
+  program_version: number | null;
+  parse_rule: string | null;
   instructor_name: string | null;
   start_time: string;
   intensity: string | null;
@@ -40,6 +47,13 @@ function mapRow(row: FeelcycleWorkoutRow): HobbyRecord {
     date: row.workout_date,
     studio: row.studio,
     program: row.program,
+    rawProgramName: row.raw_program_name ?? row.program,
+    lessonKind: row.lesson_kind ?? "unknown",
+    programFamily: row.program_family ?? "unknown",
+    programSeries: row.program_series ?? "",
+    programVariant: row.program_variant ?? "",
+    programVersion: row.program_version ?? undefined,
+    parseRule: row.parse_rule ?? "unclassified",
     instructorName: row.instructor_name ?? "",
     startTime: row.start_time.slice(0, 5),
     intensity: row.intensity ?? "",

@@ -30,32 +30,46 @@ const PIE_COLORS = [
   "#5a6573"
 ];
 
-function categorizeProgram(program: string): string {
-  const normalized = program.trim().toUpperCase();
-  const categories = ["BSBI", "BSWI", "BB1", "BB2", "BB3", "BSB", "BSW", "BSL"];
-
-  for (const category of categories) {
-    if (normalized.startsWith(category)) {
-      return category;
-    }
+function buildOrderedStats(counts: Map<string, number>, order?: string[]): GroupStat[] {
+  if (!order) {
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([label, count]) => ({ label, count }));
   }
 
-  return "その他";
+  const ordered = order
+    .map((label) => ({ label, count: counts.get(label) ?? 0 }))
+    .filter((item) => item.count > 0);
+  const extras = [...counts.entries()]
+    .filter(([label]) => !order.includes(label))
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([label, count]) => ({ label, count }));
+
+  return [...ordered, ...extras];
 }
 
-function buildProgramCategoryStats(records: HobbyRecord[]): GroupStat[] {
+function buildProgramSeriesStats(records: HobbyRecord[]): GroupStat[] {
   const counts = new Map<string, number>();
-
   for (const record of records) {
-    const label = categorizeProgram(record.program);
+    const label = record.programSeries || "未分類";
     counts.set(label, (counts.get(label) ?? 0) + 1);
   }
 
-  const order = ["BB1", "BB2", "BB3", "BSB", "BSW", "BSL", "BSBI", "BSWI", "その他"];
+  return buildOrderedStats(counts, ["BB1", "BB2", "BB3", "BSB", "BSW", "BSL", "BSBi", "BSWi"]);
+}
 
-  return order
-    .map((label) => ({ label, count: counts.get(label) ?? 0 }))
-    .filter((item) => item.count > 0);
+function buildStandardVariantStats(records: HobbyRecord[]): GroupStat[] {
+  const counts = new Map<string, number>();
+  for (const record of records) {
+    if (record.programFamily !== "standard") {
+      continue;
+    }
+
+    const label = record.programVariant || "未分類";
+    counts.set(label, (counts.get(label) ?? 0) + 1);
+  }
+
+  return buildOrderedStats(counts);
 }
 
 function collapseMinorStats(stats: GroupStat[], total: number): GroupStat[] {
@@ -183,10 +197,17 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
   const records = await getAllRecords();
   const filteredRecords = filterRecords(records, query);
   const studioStats = buildGroupStats(filteredRecords, "studio");
-  const programStats = buildProgramCategoryStats(filteredRecords);
+  const programSeriesStats = buildProgramSeriesStats(filteredRecords);
+  const standardVariantStats = buildStandardVariantStats(filteredRecords);
+  const programStats = buildGroupStats(filteredRecords, "program");
   const instructorStats = buildGroupStats(filteredRecords, "instructorName");
   const studioPieStats = collapseMinorStats(studioStats, filteredRecords.length);
   const instructorPieStats = collapseMinorStats(instructorStats, filteredRecords.length);
+  const programSeriesPieStats = collapseMinorStats(programSeriesStats, filteredRecords.length);
+  const standardVariantPieStats = collapseMinorStats(
+    standardVariantStats,
+    standardVariantStats.reduce((sum, item) => sum + item.count, 0)
+  );
   const visibleStudioStats = studioExpanded ? studioStats : studioStats.slice(0, DEFAULT_GROUP_PREVIEW_COUNT);
   const visibleInstructorStats = instructorExpanded
     ? instructorStats
@@ -237,6 +258,8 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
         <div className="grid threeCol">
           <PieCard stats={studioPieStats} title="店舗の割合" />
           <PieCard stats={instructorPieStats} title="インストラクターの割合" />
+          <PieCard stats={programSeriesPieStats} title="BB系・BS系の割合" />
+          <PieCard stats={standardVariantPieStats} title="通常プログラム分類の割合" />
 
           <article className="panel">
             <div className="panelHeader">
@@ -284,7 +307,7 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
 
           <article className="panel">
             <div className="panelHeader">
-              <h2>プログラム分類ごとの回数</h2>
+              <h2>プログラム全体の回数</h2>
               <span className="muted">{currentProgramPage} / {totalProgramPages}</span>
             </div>
             <div className="stack">

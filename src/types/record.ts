@@ -3,6 +3,13 @@ export interface HobbyRecord {
   date: string;
   studio: string;
   program: string;
+  rawProgramName: string;
+  lessonKind: string;
+  programFamily: string;
+  programSeries: string;
+  programVariant: string;
+  programVersion?: number;
+  parseRule: string;
   instructorName: string;
   startTime: string;
   intensity: string;
