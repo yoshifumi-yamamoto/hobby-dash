@@ -1,8 +1,9 @@
 import Link from "next/link";
 
 import { LayoutShell } from "@/components/layout-shell";
+import { InstructorBarCard, PieCard, getProgramPieColors, getStudioPieColors, getThemePieColors } from "@/components/records-summary";
 import { filterRecords, getAllRecords } from "@/lib/records";
-import { buildProgramSeriesStats, buildStandardVariantStats } from "@/lib/record-breakdown";
+import { buildProgramSeriesStats, buildStandardVariantStats, buildTopInstructorStats, collapseMinorStats } from "@/lib/record-breakdown";
 import type { GroupStat } from "@/types/record";
 
 export const dynamic = "force-dynamic";
@@ -67,6 +68,13 @@ export default async function BreakdownPage({ searchParams }: BreakdownPageProps
   const query = params.q?.trim() ?? "";
   const records = filterRecords(await getAllRecords(), query);
   const { studioStats, programSeriesStats, standardVariantStats, instructorStats } = buildStats(records);
+  const studioPieStats = collapseMinorStats(studioStats, records.length);
+  const programSeriesPieStats = collapseMinorStats(programSeriesStats, records.length);
+  const standardVariantPieStats = collapseMinorStats(
+    standardVariantStats,
+    standardVariantStats.reduce((sum, item) => sum + item.count, 0)
+  );
+  const instructorBarStats = buildTopInstructorStats(instructorStats);
 
   return (
     <LayoutShell
@@ -80,6 +88,34 @@ export default async function BreakdownPage({ searchParams }: BreakdownPageProps
             {query ? `「${query}」で絞り込み中。` : ""}
             <Link className="textToggle" href={query ? `/records?q=${encodeURIComponent(query)}` : "/records"}>サマリーに戻る</Link>
           </p>
+        </div>
+
+        <div className="grid threeCol">
+          <PieCard
+            centerLabel="札幌優勢"
+            centerValue={`${Math.round(((studioPieStats[0]?.count ?? 0) / Math.max(records.length, 1)) * 100)}%`}
+            colors={getStudioPieColors()}
+            stats={studioPieStats}
+            summary="詳細一覧に入る前に、まず大枠の偏りを上段で確認できます。"
+            title="店舗別"
+          />
+          <PieCard
+            centerLabel="最多カテゴリ"
+            centerValue={programSeriesPieStats[0] ? `${programSeriesPieStats[0].label} ${((programSeriesPieStats[0].count / Math.max(records.length, 1)) * 100).toFixed(0)}%` : "-"}
+            colors={getProgramPieColors()}
+            stats={programSeriesPieStats}
+            summary="BB系・BS系の比率を一覧の前に視覚で把握できます。"
+            title="プログラム別"
+          />
+          <InstructorBarCard stats={instructorBarStats} title="インストラクター別" />
+          <PieCard
+            centerLabel="最多テーマ"
+            centerValue={standardVariantPieStats[0] ? `${standardVariantPieStats[0].label} ${((standardVariantPieStats[0].count / Math.max(standardVariantStats.reduce((sum, item) => sum + item.count, 0), 1)) * 100).toFixed(0)}%` : "-"}
+            colors={getThemePieColors()}
+            stats={standardVariantPieStats}
+            summary="テーマやジャンルもプログラム別と同じドーナツ表現で揃えています。"
+            title="テーマ・ジャンル別"
+          />
         </div>
 
         <div className="grid twoCol">

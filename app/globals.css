@@ -949,7 +949,7 @@ input {
   line-height: 1.9;
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1280px) {
   .hero {
     grid-template-columns: 1fr;
     align-items: start;
