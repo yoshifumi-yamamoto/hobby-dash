@@ -24,6 +24,7 @@ export function InstructorTrendCard({ series }: { series: InstructorMonthlySerie
 
   const max = Math.max(...visibleSeries.flatMap((item) => item.points.map((point) => point.count)), 1);
   const total = series.reduce((sum, item) => sum + item.total, 0);
+  const yAxisTicks = [max, Math.max(Math.round(max * 0.66), 1), Math.max(Math.round(max * 0.33), 1), 0];
 
   function toggle(label: string) {
     setVisible((current) =>
@@ -60,14 +61,17 @@ export function InstructorTrendCard({ series }: { series: InstructorMonthlySerie
       </div>
       <div className="chartCard instructorTrendChartCard">
         <svg className="lineChart" viewBox="0 0 680 250" aria-label="Instructor monthly trend" role="img">
-          {[0, 1, 2, 3].map((step) => (
-            <line className="chartGridLine" key={step} x1="24" x2="656" y1={42 + step * 42} y2={42 + step * 42} />
+          {yAxisTicks.map((tick, index) => (
+            <g key={tick}>
+              <line className="chartGridLine" x1="46" x2="656" y1={42 + index * 42} y2={42 + index * 42} />
+              <text className="chartYAxisLabel" x="36" y={46 + index * 42}>{tick}</text>
+            </g>
           ))}
           {visibleSeries.map((item, index) => {
             const color = INSTRUCTOR_COLORS[index % INSTRUCTOR_COLORS.length];
             const points = item.points.map((point, pointIndex) => ({
               ...point,
-              x: 30 + pointIndex * (item.points.length <= 1 ? 0 : 612 / (item.points.length - 1)),
+              x: 52 + pointIndex * (item.points.length <= 1 ? 0 : 590 / (item.points.length - 1)),
               y: 176 - Math.round((point.count / max) * 112)
             }));
             const path = buildLine(points);
@@ -96,8 +100,8 @@ export function InstructorTrendCard({ series }: { series: InstructorMonthlySerie
                     <circle cx={point.x} cy={point.y} fill={color} r="4.5" />
                     {pointIndex === points.length - 1 ? (
                       <>
-                        <text className="chartPointValue" x={point.x + 10} y={point.y - 8}>{item.label}</text>
-                        <text className="chartPointValue" x={point.x + 10} y={point.y + 10}>{point.count}</text>
+                        <text className="chartSeriesLabel" x={point.x + 10} y={point.y - 8}>{item.label}</text>
+                        <text className="chartSeriesValue" x={point.x + 10} y={point.y + 10}>{point.count}回</text>
                       </>
                     ) : null}
                   </g>
@@ -109,7 +113,7 @@ export function InstructorTrendCard({ series }: { series: InstructorMonthlySerie
             <text
               className="chartAxisLabel"
               key={label}
-              x={30 + index * (monthLabels.length <= 1 ? 0 : 612 / (monthLabels.length - 1))}
+              x={52 + index * (monthLabels.length <= 1 ? 0 : 590 / (monthLabels.length - 1))}
               y="226"
             >
               {label}

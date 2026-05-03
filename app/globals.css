@@ -751,7 +751,10 @@ select {
 }
 
 .chartPointValue,
-.chartAxisLabel {
+.chartAxisLabel,
+.chartYAxisLabel,
+.chartSeriesLabel,
+.chartSeriesValue {
   fill: var(--muted);
   font-size: 12px;
   text-anchor: middle;
@@ -760,6 +763,26 @@ select {
 .chartPointValue {
   fill: #d5dffb;
   font-size: 11px;
+}
+
+.chartYAxisLabel {
+  text-anchor: end;
+  font-size: 11px;
+}
+
+.chartSeriesLabel,
+.chartSeriesValue {
+  text-anchor: start;
+}
+
+.chartSeriesLabel {
+  fill: #f1f5ff;
+  font-size: 11px;
+}
+
+.chartSeriesValue {
+  fill: var(--muted);
+  font-size: 10px;
 }
 
 .visualPanel {
