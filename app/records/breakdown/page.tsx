@@ -2,40 +2,39 @@ import Link from "next/link";
 
 import { LayoutShell } from "@/components/layout-shell";
 import { InstructorBarCard, PieCard, getProgramPieColors, getStudioPieColors, getThemePieColors } from "@/components/records-summary";
-import { filterRecords, getAllRecords } from "@/lib/records";
-import { THEME_PIE_LIMIT, buildProgramSeriesStats, buildStandardVariantStats, buildTopInstructorStats, collapseAfterLimit, collapseMinorStats } from "@/lib/record-breakdown";
-import type { GroupStat } from "@/types/record";
+import { RecordFiltersForm } from "@/components/record-filters-form";
+import { applyRecordFilters, buildFilterOptions, getAllRecords } from "@/lib/records";
+import {
+  THEME_PIE_LIMIT,
+  buildProgramSeriesStats,
+  buildStandardVariantStats,
+  buildTopInstructorStats,
+  collapseAfterLimit,
+  collapseMinorStats
+} from "@/lib/record-breakdown";
+import type { GroupStat, RecordFilterOptions } from "@/types/record";
 
 export const dynamic = "force-dynamic";
 
 interface BreakdownPageProps {
-  searchParams?: Promise<{
-    q?: string;
-    section?: string;
-  }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
-function buildStats(records: Awaited<ReturnType<typeof getAllRecords>>) {
-  const studioCounts = new Map<string, number>();
-  const instructorCounts = new Map<string, number>();
+function getSingle(params: Record<string, string | string[] | undefined>, key: string) {
+  const value = params[key];
+  return Array.isArray(value) ? value[0] : value;
+}
 
-  for (const record of records) {
-    studioCounts.set(record.studio, (studioCounts.get(record.studio) ?? 0) + 1);
-    instructorCounts.set(record.instructorName || "未取得", (instructorCounts.get(record.instructorName || "未取得") ?? 0) + 1);
-  }
-
-  const studioStats = [...studioCounts.entries()]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .map(([label, count]) => ({ label, count }));
-  const instructorStats = [...instructorCounts.entries()]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .map(([label, count]) => ({ label, count }));
-
+function readFilters(params: Record<string, string | string[] | undefined>): RecordFilterOptions {
   return {
-    studioStats,
-    programSeriesStats: buildProgramSeriesStats(records),
-    standardVariantStats: buildStandardVariantStats(records),
-    instructorStats
+    query: getSingle(params, "query")?.trim() ?? "",
+    studio: getSingle(params, "studio")?.trim() ?? "",
+    instructor: getSingle(params, "instructor")?.trim() ?? "",
+    programSeries: getSingle(params, "programSeries")?.trim() ?? "",
+    programVariant: getSingle(params, "programVariant")?.trim() ?? "",
+    lessonKind: getSingle(params, "lessonKind")?.trim() ?? "",
+    dateFrom: getSingle(params, "dateFrom")?.trim() ?? "",
+    dateTo: getSingle(params, "dateTo")?.trim() ?? ""
   };
 }
 
@@ -63,10 +62,36 @@ function SectionTable({ title, stats }: { title: string; stats: GroupStat[] }) {
   );
 }
 
+function buildStats(records: Awaited<ReturnType<typeof getAllRecords>>) {
+  const studioCounts = new Map<string, number>();
+  const instructorCounts = new Map<string, number>();
+
+  for (const record of records) {
+    studioCounts.set(record.studio, (studioCounts.get(record.studio) ?? 0) + 1);
+    instructorCounts.set(record.instructorName || "未取得", (instructorCounts.get(record.instructorName || "未取得") ?? 0) + 1);
+  }
+
+  const studioStats = [...studioCounts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([label, count]) => ({ label, count }));
+  const instructorStats = [...instructorCounts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([label, count]) => ({ label, count }));
+
+  return {
+    studioStats,
+    programSeriesStats: buildProgramSeriesStats(records),
+    standardVariantStats: buildStandardVariantStats(records),
+    instructorStats
+  };
+}
+
 export default async function BreakdownPage({ searchParams }: BreakdownPageProps) {
-  const params = (await searchParams) ?? {};
-  const query = params.q?.trim() ?? "";
-  const records = filterRecords(await getAllRecords(), query);
+  const rawParams = (await searchParams) ?? {};
+  const filters = readFilters(rawParams);
+  const allRecords = await getAllRecords();
+  const records = applyRecordFilters(allRecords, filters);
+  const options = buildFilterOptions(allRecords);
   const { studioStats, programSeriesStats, standardVariantStats, instructorStats } = buildStats(records);
   const studioPieStats = collapseMinorStats(studioStats, records.length);
   const programSeriesPieStats = collapseMinorStats(programSeriesStats, records.length);
@@ -83,10 +108,11 @@ export default async function BreakdownPage({ searchParams }: BreakdownPageProps
         <div className="listMeta panel">
           <strong>{records.length}件の集計対象</strong>
           <p className="muted">
-            {query ? `「${query}」で絞り込み中。` : ""}
-            <Link className="textToggle" href={query ? `/records?q=${encodeURIComponent(query)}` : "/records"}>サマリーに戻る</Link>
+            <Link className="textToggle" href="/records">サマリーに戻る</Link>
           </p>
         </div>
+
+        <RecordFiltersForm action="/records/breakdown" filters={filters} options={options} />
 
         <div className="grid recordsSummaryGrid">
           <PieCard

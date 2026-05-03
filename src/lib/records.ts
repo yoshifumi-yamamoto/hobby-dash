@@ -1,6 +1,13 @@
 import { createClient } from "@supabase/supabase-js";
 
-import type { GroupStat, HobbyRecord, MonthlyStat } from "@/types/record";
+import type {
+  GroupStat,
+  HobbyRecord,
+  InstructorMonthlySeries,
+  MonthlySeriesPoint,
+  MonthlyStat,
+  RecordFilterOptions
+} from "@/types/record";
 
 interface FeelcycleWorkoutRow {
   id: string;
@@ -178,17 +185,7 @@ export async function getRecentRecords(limit = 4): Promise<HobbyRecord[]> {
 }
 
 export async function getMonthlyStats(): Promise<MonthlyStat[]> {
-  const records = await getAllRecords();
-  const counts = new Map<string, number>();
-
-  for (const record of records) {
-    const month = record.date.slice(0, 7);
-    counts.set(month, (counts.get(month) ?? 0) + 1);
-  }
-
-  return [...counts.entries()]
-    .sort((a, b) => b[0].localeCompare(a[0]))
-    .map(([month, count]) => ({ month, count }));
+  return buildMonthlyStats(await getAllRecords());
 }
 
 export async function getRecentThreeMonthCount(): Promise<number> {
@@ -261,6 +258,64 @@ export function filterRecords(records: HobbyRecord[], query: string): HobbyRecor
   );
 }
 
+export function applyRecordFilters(records: HobbyRecord[], filters: RecordFilterOptions): HobbyRecord[] {
+  const query = filters.query?.trim().toLowerCase() ?? "";
+
+  return records.filter((record) => {
+    if (query) {
+      const matched = [
+        record.date,
+        record.studio,
+        record.program,
+        record.rawProgramName,
+        record.programSeries,
+        record.programVariant,
+        record.instructorName,
+        record.startTime,
+        record.subjectiveMemo,
+        record.conditionMemo
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(query);
+
+      if (!matched) {
+        return false;
+      }
+    }
+
+    if (filters.studio && record.studio !== filters.studio) {
+      return false;
+    }
+
+    if (filters.instructor && record.instructorName !== filters.instructor) {
+      return false;
+    }
+
+    if (filters.programSeries && record.programSeries !== filters.programSeries) {
+      return false;
+    }
+
+    if (filters.programVariant && record.programVariant !== filters.programVariant) {
+      return false;
+    }
+
+    if (filters.lessonKind && record.lessonKind !== filters.lessonKind) {
+      return false;
+    }
+
+    if (filters.dateFrom && record.date < filters.dateFrom) {
+      return false;
+    }
+
+    if (filters.dateTo && record.date > filters.dateTo) {
+      return false;
+    }
+
+    return true;
+  });
+}
+
 export function buildGroupStats(
   records: HobbyRecord[],
   key: "studio" | "program" | "instructorName"
@@ -275,4 +330,123 @@ export function buildGroupStats(
   return [...counts.entries()]
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .map(([label, count]) => ({ label, count }));
+}
+
+export function buildMonthlyStats(records: HobbyRecord[]): MonthlyStat[] {
+  const counts = new Map<string, number>();
+
+  for (const record of records) {
+    const month = record.date.slice(0, 7);
+    counts.set(month, (counts.get(month) ?? 0) + 1);
+  }
+
+  return [...counts.entries()]
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([month, count]) => ({ month, count }));
+}
+
+export function trimMonthlyStats(stats: MonthlyStat[], period: string): MonthlyStat[] {
+  if (period === "all") {
+    return stats;
+  }
+
+  const limit = Number.parseInt(period, 10);
+  if (!Number.isFinite(limit) || limit <= 0) {
+    return stats.slice(0, 12);
+  }
+
+  return stats.slice(0, limit);
+}
+
+function toAscendingSeries(stats: MonthlyStat[]): MonthlySeriesPoint[] {
+  return stats
+    .slice()
+    .reverse()
+    .map((item) => ({ month: item.month, count: item.count }));
+}
+
+export function buildMonthlySeries(records: HobbyRecord[], period: string): MonthlySeriesPoint[] {
+  return toAscendingSeries(trimMonthlyStats(buildMonthlyStats(records), period));
+}
+
+export function buildInstructorMonthlySeries(
+  records: HobbyRecord[],
+  period: string,
+  limit = 7
+): InstructorMonthlySeries[] {
+  const monthlyStats = trimMonthlyStats(buildMonthlyStats(records), period);
+  const monthsAscending = monthlyStats.slice().reverse().map((item) => item.month);
+  const totals = new Map<string, number>();
+
+  for (const record of records) {
+    const name = record.instructorName || "未取得";
+    totals.set(name, (totals.get(name) ?? 0) + 1);
+  }
+
+  const topInstructors = [...totals.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, limit);
+
+  return topInstructors.map(([label, total]) => {
+    const counts = new Map<string, number>();
+
+    for (const record of records) {
+      const name = record.instructorName || "未取得";
+      if (name !== label) {
+        continue;
+      }
+
+      const month = record.date.slice(0, 7);
+      if (!monthsAscending.includes(month)) {
+        continue;
+      }
+
+      counts.set(month, (counts.get(month) ?? 0) + 1);
+    }
+
+    return {
+      label,
+      total,
+      points: monthsAscending.map((month) => ({
+        month,
+        count: counts.get(month) ?? 0
+      }))
+    };
+  });
+}
+
+export function buildFilterOptions(records: HobbyRecord[]) {
+  const studios = new Set<string>();
+  const instructors = new Set<string>();
+  const programSeries = new Set<string>();
+  const programVariants = new Set<string>();
+  const lessonKinds = new Set<string>();
+
+  for (const record of records) {
+    if (record.studio) {
+      studios.add(record.studio);
+    }
+    if (record.instructorName) {
+      instructors.add(record.instructorName);
+    }
+    if (record.programSeries) {
+      programSeries.add(record.programSeries);
+    }
+    if (record.programVariant) {
+      programVariants.add(record.programVariant);
+    }
+    if (record.lessonKind) {
+      lessonKinds.add(record.lessonKind);
+    }
+  }
+
+  const sort = (values: Set<string>) => [...values].sort((a, b) => a.localeCompare(b));
+
+  return {
+    studios: sort(studios),
+    instructors: sort(instructors),
+    programSeries: sort(programSeries),
+    programVariants: sort(programVariants),
+    lessonKinds: sort(lessonKinds)
+  };
 }

@@ -66,7 +66,8 @@ a {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -838,6 +839,103 @@ input {
   gap: 12px;
 }
 
+.quickNavPanel,
+.monthlyTrendPanel,
+.instructorTrendPanel {
+  padding: 26px;
+}
+
+.quickNavRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.filterPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.filterPill,
+.toggleChip,
+.periodTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.filterHint {
+  margin-top: 12px;
+}
+
+.filterGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.filterField {
+  display: grid;
+  gap: 8px;
+}
+
+.periodTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 8px 0 16px;
+}
+
+.periodTab {
+  color: var(--muted);
+}
+
+.periodTab--active,
+.toggleChip--active {
+  color: var(--text);
+  border-color: rgba(151, 176, 255, 0.24);
+  background: rgba(151, 176, 255, 0.12);
+}
+
+.monthlyTrendCard {
+  padding: 10px 12px 4px;
+}
+
+.toggleGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.toggleChip {
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.instructorTrendStack {
+  gap: 16px;
+}
+
+.instructorTrendRow {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.instructorSparkline {
+  width: 100%;
+  height: auto;
+  margin-top: 8px;
+}
+
 .searchLabel {
   font-weight: 700;
   color: var(--muted);
@@ -1052,6 +1150,12 @@ input {
 
   .pieLayout {
     grid-template-columns: 1fr;
+  }
+
+  .filterGrid,
+  .quickNavRow {
+    grid-template-columns: 1fr;
+    display: grid;
   }
 
   .pieChartWrap {

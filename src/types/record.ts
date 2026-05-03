@@ -28,3 +28,25 @@ export interface GroupStat {
   label: string;
   count: number;
 }
+
+export interface RecordFilterOptions {
+  query?: string;
+  studio?: string;
+  instructor?: string;
+  programSeries?: string;
+  programVariant?: string;
+  lessonKind?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export interface MonthlySeriesPoint {
+  month: string;
+  count: number;
+}
+
+export interface InstructorMonthlySeries {
+  label: string;
+  total: number;
+  points: MonthlySeriesPoint[];
+}
